@@ -18,7 +18,7 @@ declare module "#app" {
   }
 }
 
-declare module "@vue/runtime-core" {
+declare module "vue" {
   interface GlobalDirectives {
     vKeybind: typeof vKeybind;
     vRun: typeof vRun;
@@ -31,4 +31,4 @@ declare module "nuxt/schema" {
   }
 }
 
-export { };
+export {};
