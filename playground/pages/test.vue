@@ -70,10 +70,6 @@ useKeybind([
   },
 ]);
 
-useKeybindRecorder((sequence) => {
-  console.log("User pressed:", sequence);
-});
-
 const editor = useKeybindLayer("editor");
 
 editor.listen({
@@ -89,5 +85,11 @@ useKeybind({
     editor.toggle();
     console.log("Editor layer toggled");
   },
+});
+
+onMounted(() => {
+  window.addEventListener("keydown", (e) => {
+    console.log("PRESSED:", e.key, " - ", e.code);
+  });
 });
 </script>

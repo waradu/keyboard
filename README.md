@@ -369,6 +369,10 @@ The function passed to `v-run` behaves the same as the `run` callback in `keyboa
 
 ## Changes
 
+### v8 -> v9
+
+- Fixed run return type by ignoring it
+
 ### v7.4 -> v8
 
 - Added `parseKeyData` to parse a key data into a key string
