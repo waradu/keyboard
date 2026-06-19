@@ -2,6 +2,7 @@ import {
   keys,
   modifiers,
   platforms,
+  SEPARATOR,
   type KeySequence,
   type KeyString,
   type KeyValue,
@@ -73,7 +74,7 @@ export const parseKeyString = (sequence: KeyString): KeyDataOutput | undefined =
     keySequence = seq;
   }
 
-  const parts = keySequence.split("_");
+  const parts = keySequence.split(SEPARATOR);
   if (parts.length === 0) return;
 
   const key = parts.pop() as KeyValue;
@@ -132,7 +133,7 @@ export const parseKeyData = (data: KeyData): KeyString => {
   }
 
   for (const modifier of activeModifiers) {
-    sequence += `${modifier}_`;
+    sequence += `${modifier}${SEPARATOR}`;
   }
 
   sequence += data.key;

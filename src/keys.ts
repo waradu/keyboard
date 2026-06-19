@@ -1,3 +1,5 @@
+export const SEPARATOR = "+" as const;
+
 export const keys = {
   // Control / system (without modifiers)
   backspace: "backspace",
@@ -157,8 +159,7 @@ type Join<T extends readonly string[], Sep extends string> = T extends []
       ? `${F}${Sep}${Join<R, Sep>}`
       : string;
 
-type WithModifier = `${Join<PrefixTuples, "_">}_${KeyValue}`;
-
+type WithModifier = `${Join<PrefixTuples, typeof SEPARATOR>}${typeof SEPARATOR}${KeyValue}`;
 export type KeySequence = KeyValue | WithModifier;
 
 export type KeyString = KeySequence | `${PlatformValue}:${KeySequence}` | "any";

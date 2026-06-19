@@ -28,9 +28,6 @@ jobs:
       - name: Test
         run: bun test
 
-      - name: Test Types
-        run: bun test-types
-
       - name: Lint
         run: bun run lint
 

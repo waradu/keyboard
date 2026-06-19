@@ -24,10 +24,6 @@
         <span>{{
           listener.config.layers ? `(layer: ${listener.config.layers.join(", ")})` : ""
         }}</span>
-        <span>(cound: {{ listener.stats.count }})</span>
-        <span v-if="listener.stats.lastTrigger"
-          >(last: {{ listener.stats.lastTrigger.toTimeString().slice(0, 8) }})</span
-        >
       </div>
     </ClientOnly>
   </footer>

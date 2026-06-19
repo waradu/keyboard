@@ -4,10 +4,10 @@ import type { KeyString } from "../src/keys";
 
 [
   // Simple KeyString
-  "control_x",
+  "control+x",
 
   // Complex KeyString
-  "meta_control_alt_shift_arrow-up",
+  "meta+control+alt+shift+arrow-up",
 
   // Single Key
   "c",
@@ -16,7 +16,7 @@ import type { KeyString } from "../src/keys";
   "macos:x",
 
   // Templates
-  "alt_$num",
+  "alt+$num",
 
   // Catch all
   "any",
@@ -25,10 +25,10 @@ import type { KeyString } from "../src/keys";
   "",
 
   // @ts-expect-error `shift` comes after `alt`
-  "shift_alt_y",
+  "shift+alt+y",
 
   // @ts-expect-error `key` is required
-  "meta_control",
+  "meta+control",
 
   // @ts-expect-error `lunix` is not a valid platform
   "lunix:x",

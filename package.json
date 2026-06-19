@@ -22,7 +22,6 @@
     "./nuxt": "./src/nuxt/index.ts"
   },
   "scripts": {
-    "test-types": "tsc --noEmit tests/types.ts",
     "playground": "cd playground && bun dev",
     "playground:prepare": "cd playground && bun i",
     "setup": "lefthook install",

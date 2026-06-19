@@ -2,7 +2,8 @@ import { test, expect, mock, type Mock } from "bun:test";
 
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
 import { parseKeyData, parseKeyString, useKeyboard } from "@waradu/keyboard";
-import type { HandlerContext, Os } from "src/types";
+
+import type { HandlerContext, Os } from "../src/types";
 
 GlobalRegistrator.register();
 
@@ -164,7 +165,7 @@ test("keyboard handler only fires if all keys have been pressed", () => {
   const { keyboard, spy } = prepare();
 
   keyboard.listen({
-    keys: ["control_y"],
+    keys: ["control+y"],
     run: spy,
   });
 
@@ -181,7 +182,7 @@ test("keyboard handler only fires if all keys are being pressed together", () =>
   const { keyboard, spy } = prepare();
 
   keyboard.listen({
-    keys: ["control_y"],
+    keys: ["control+y"],
     run: spy,
   });
 
@@ -199,7 +200,7 @@ test("keyboard handler can handle complex keybinds", () => {
   const { keyboard, spy } = prepare();
 
   keyboard.listen({
-    keys: ["meta_control_alt_shift_arrow-up"],
+    keys: ["meta+control+alt+shift+arrow-up"],
     run: spy,
   });
 
@@ -264,7 +265,7 @@ test("keyboard handler returns dynamic number press", () => {
   const { keyboard, spy } = prepare();
 
   keyboard.listen({
-    keys: ["alt_$num"],
+    keys: ["alt+$num"],
     run: spy,
   });
 
@@ -290,7 +291,7 @@ test("parse key string into key data", () => {
     },
   });
 
-  expect(parseKeyString("meta_control_alt_shift_arrow-up")).toEqual({
+  expect(parseKeyString("meta+control+alt+shift+arrow-up")).toEqual({
     key: "arrow-up",
     modifiers: {
       alt: true,
@@ -311,7 +312,7 @@ test("parse key string into key data", () => {
     },
   });
 
-  expect(parseKeyString("alt_$num")).toEqual({
+  expect(parseKeyString("alt+$num")).toEqual({
     key: "$num",
     modifiers: {
       alt: true,
@@ -332,11 +333,11 @@ test("parse key string into key data", () => {
   });
 
   //@ts-expect-error out of order
-  expect(parseKeyString("meta_alt_control_k")).toBeUndefined();
+  expect(parseKeyString("meta+alt+control+k")).toBeUndefined();
   //@ts-expect-error mac does not exist
   expect(parseKeyString("mac:k")).toBeUndefined();
   //@ts-expect-error notreal is not a real key (duh)
-  expect(parseKeyString("meta_notreal")).toBeUndefined();
+  expect(parseKeyString("meta+notreal")).toBeUndefined();
 });
 
 test("parse key data into key string", () => {
@@ -357,7 +358,7 @@ test("parse key data into key string", () => {
         shift: true,
       },
     }),
-  ).toEqual("meta_control_alt_shift_arrow-up");
+  ).toEqual("meta+control+alt+shift+arrow-up");
 
   expect(
     parseKeyData({
@@ -374,7 +375,7 @@ test("parse key data into key string", () => {
         alt: true,
       },
     }),
-  ).toEqual("alt_$num");
+  ).toEqual("alt+$num");
 
   expect(
     parseKeyData({

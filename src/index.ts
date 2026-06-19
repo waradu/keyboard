@@ -3,6 +3,7 @@ import type { KeyData } from "./helper";
 import {
   keys,
   modifiers,
+  SEPARATOR,
   type KeyKey,
   type KeySequence,
   type KeyString,
@@ -65,7 +66,7 @@ export const useKeyboard = (config: KeyboardConfig = {}) => {
         }
 
         if (platform) {
-          const browserPlatform = detectOsInBrowser();
+          const browserPlatform = config.platform ?? detectOsInBrowser();
 
           if (platform === "linux" && browserPlatform !== "linux") continue;
           if (platform === "win" && browserPlatform !== "windows") continue;
@@ -75,7 +76,7 @@ export const useKeyboard = (config: KeyboardConfig = {}) => {
           if (platform === "no-macos" && browserPlatform === "macos") continue;
         }
 
-        let [k, ...mods] = key.split("_").reverse() as [KeyValue, ...ModifierValue[]];
+        let [k, ...mods] = key.split(SEPARATOR).reverse() as [KeyValue, ...ModifierValue[]];
 
         const pressedKeysArray = Array.from(pressedKeys);
         const firstKey = pressedKeysArray[pressedKeysArray.length - 1];
@@ -336,7 +337,7 @@ export const useKeyboard = (config: KeyboardConfig = {}) => {
       if (event.shiftKey) sequenceParts.push(modifiers.shift);
 
       const sequence = sequenceParts.length
-        ? (`${sequenceParts.join("_")}_${key}` as KeySequence)
+        ? (`${sequenceParts.join(SEPARATOR)}${SEPARATOR}${key}` as KeySequence)
         : (key as KeySequence);
 
       cb(sequence);

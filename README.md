@@ -372,6 +372,9 @@ The function passed to `v-run` behaves the same as the `run` callback in `keyboa
 ### v8 -> v9
 
 - Fixed run return type by ignoring it
+- Changed seperator from "\_" to "+"
+- Better and faster os detection
+- Removed stats
 
 ### v7.4 -> v8
 
