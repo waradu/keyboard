@@ -22,7 +22,7 @@ useKeybind([
     },
   },
   {
-    keys: ["control_b"],
+    keys: ["control+b"],
     run() {
       console.log("RUN BB");
     },
@@ -30,7 +30,7 @@ useKeybind([
 ]);
 
 useKeybind({
-  keys: ["control_r", "meta_r"],
+  keys: ["control+r", "meta+r"],
   run() {
     console.log("Refresh prevented!");
   },
@@ -51,19 +51,19 @@ useKeybind({
 
 useKeybind([
   {
-    keys: ["macos:meta_x"],
+    keys: ["macos:meta+x"],
     run() {
       console.log("Hello from 'macos'.");
     },
   },
   {
-    keys: ["win:control_x"],
+    keys: ["win:control+x"],
     run() {
       console.log("Hello from 'windows'.");
     },
   },
   {
-    keys: ["linux:control_x"],
+    keys: ["linux:control+x"],
     run() {
       console.log("Hello from 'linux'.");
     },
@@ -80,7 +80,7 @@ editor.listen({
 });
 
 useKeybind({
-  keys: "control_y",
+  keys: "control+y",
   run() {
     editor.toggle();
     console.log("Editor layer toggled");

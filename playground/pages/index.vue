@@ -14,7 +14,7 @@ useKeybind([
     },
   },
   {
-    keys: ["control_b"],
+    keys: ["control+b"],
     run() {
       console.log("RUN AB");
     },
@@ -23,13 +23,13 @@ useKeybind([
 
 useKeybind([
   {
-    keys: ["no-macos:control_z", "macos:meta_z"],
+    keys: ["no-macos:control+z", "macos:meta+z"],
     run() {
       console.log("undo");
     },
   },
   {
-    keys: ["no-macos:control_shift_z", "macos:meta_shift_z"],
+    keys: ["no-macos:control+shift+z", "macos:meta+shift+z"],
     run() {
       console.log("redo");
     },
@@ -37,7 +37,7 @@ useKeybind([
 ]);
 
 useKeybind({
-  keys: ["alt_$num"],
+  keys: ["alt+$num"],
   run(ctx) {
     console.log("Number:", ctx.template);
   },
