@@ -11,7 +11,7 @@ const prepare = (platform?: Os) => {
   });
   keyboard.init();
 
-  // Should return void but we need to return the context to check fo the template.
+  // Should return void but we need to return the context to check for the template.
   const spy = mock((context: HandlerContext) => [context]) as unknown as Mock<() => void>;
 
   return { keyboard, spy };

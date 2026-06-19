@@ -7,7 +7,7 @@ export interface HandlerContext {
   event: KeyboardEvent;
 }
 
-export type Handler = (context: HandlerContext) => (void | Promise<void>);
+export type Handler = (context: HandlerContext) => unknown;
 
 export interface Config {
   /**
@@ -101,7 +101,7 @@ export interface ListenerStats {
 
 export interface Listener {
   id: string;
-  off: () => void;
+  off: () => unknown;
 
   keys: KeyString[];
   handler: Handler;
@@ -118,4 +118,4 @@ export interface Options {
   config?: Config;
 }
 
-export type SubscribeCallback = (handlers: Handlers) => void;
+export type SubscribeCallback = (handlers: Handlers) => unknown;
