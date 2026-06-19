@@ -89,7 +89,7 @@ useKeybind({
 
 onMounted(() => {
   window.addEventListener("keydown", (e) => {
-    console.log("PRESSED:", e.key, " - ", e.code);
+    console.log("KEY:", e.key, "CODE:", e.code);
   });
 });
 </script>

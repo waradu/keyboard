@@ -18,7 +18,6 @@ import type {
   Handler,
   HandlerContext,
   Options,
-  Os,
   Listener,
   SubscribeCallback,
   LayerOptions,
@@ -29,16 +28,8 @@ import type {
  *
  * @param config Optional settings to configure the keyboard.
  */
-export const useKeyboard = (config?: KeyboardConfig) => {
-  config = {
-    debug: false,
-    stats: true,
-    ...Object.fromEntries(Object.entries(config ?? {}).filter(([, v]) => v !== undefined)),
-  };
-
-  const instanceSignal = config.signal;
+export const useKeyboard = (config: KeyboardConfig = {}) => {
   let listeners: Handlers = [];
-  let detectedPlatform: Os | null = config.platform ?? null;
   const disabledLayers = new Set<string>();
   const allLayers = new Set<string>();
 
@@ -74,12 +65,14 @@ export const useKeyboard = (config?: KeyboardConfig) => {
         }
 
         if (platform) {
-          if (platform === "linux" && detectedPlatform !== "linux") continue;
-          if (platform === "win" && detectedPlatform !== "windows") continue;
-          if (platform === "macos" && detectedPlatform !== "macos") continue;
-          if (platform === "no-linux" && detectedPlatform === "linux") continue;
-          if (platform === "no-win" && detectedPlatform === "windows") continue;
-          if (platform === "no-macos" && detectedPlatform === "macos") continue;
+          const browserPlatform = detectOsInBrowser();
+
+          if (platform === "linux" && browserPlatform !== "linux") continue;
+          if (platform === "win" && browserPlatform !== "windows") continue;
+          if (platform === "macos" && browserPlatform !== "macos") continue;
+          if (platform === "no-linux" && browserPlatform === "linux") continue;
+          if (platform === "no-win" && browserPlatform === "windows") continue;
+          if (platform === "no-macos" && browserPlatform === "macos") continue;
         }
 
         let [k, ...mods] = key.split("_").reverse() as [KeyValue, ...ModifierValue[]];
@@ -162,22 +155,10 @@ export const useKeyboard = (config?: KeyboardConfig) => {
         event: event,
       });
 
-      if (config.stats) {
-        listeners.forEach(async (l) => {
-          if (l.id == listener.id) {
-            l.stats.count += 1;
-            l.stats.lastTrigger = new Date();
-            return;
-          }
-        });
-      }
-
       log(`handled '${listener.id}'`);
 
       if (listener.config?.once) unlisten(listener.id);
     });
-
-    if (config.stats) notify();
   };
 
   const onKeyup = (event: KeyboardEvent): void => {
@@ -232,17 +213,11 @@ export const useKeyboard = (config?: KeyboardConfig) => {
       window.addEventListener("keyup", onKeyup);
       window.addEventListener("blur", onBlur);
 
-      const abortSignal = opts?.signal ?? instanceSignal;
+      const abortSignal = opts?.signal ?? config.signal;
       if (abortSignal) {
         if (abortSignal.aborted) destroy();
         else abortSignal.addEventListener("abort", destroy, { once: true });
       }
-
-      if (!detectedPlatform)
-        detectOsInBrowser().then((res) => {
-          if (["macos", "linux", "windows"].includes(res)) detectedPlatform = res;
-          log("platform detected as:", res);
-        });
 
       log("initialized");
     } else {
@@ -313,11 +288,6 @@ export const useKeyboard = (config?: KeyboardConfig) => {
           keys: keys,
           handler: option.run,
           config: config,
-
-          stats: {
-            count: 0,
-            lastTrigger: null,
-          },
         };
 
         listeners.push(listener);

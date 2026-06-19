@@ -89,7 +89,7 @@ export const keys = {
   mediapause: "media-pause",
   mediastop: "media-stop",
 
-  // Symbols / punctuation (from event.key)
+  // Symbols / punctuation
   "-": "minus",
   "=": "equal",
   "+": "plus",

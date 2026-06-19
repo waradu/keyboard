@@ -20,25 +20,19 @@ export const isEditableElement = (element: Element): boolean => {
   return editableElements.some((selector) => element.matches(selector));
 };
 
-export async function detectOsInBrowser(): Promise<Os> {
-  const nav = navigator as any;
+export function detectOsInBrowser(): Os {
+  if (typeof navigator === "undefined") return "unknown";
 
-  if (nav.userAgentData && typeof nav.userAgentData.getHighEntropyValues === "function") {
-    try {
-      const { platform } = await nav.userAgentData.getHighEntropyValues(["platform"]);
-      const p = String(platform || "").toLowerCase();
-      if (p.includes("mac")) return "macos";
-      if (p.includes("win")) return "windows";
-      if (p.includes("linux") || p.includes("chrome os")) return "linux";
-    } catch {}
-  }
-
-  const plat = (navigator.platform || "").toLowerCase();
+  const platform = (navigator.platform || "").toLowerCase();
   const ua = (navigator.userAgent || "").toLowerCase();
 
-  if (plat.includes("mac") || ua.includes("mac os x")) return "macos";
-  if (plat.includes("win") || ua.includes("windows")) return "windows";
-  if (plat.includes("linux") || ua.includes("x11") || ua.includes("cros")) return "linux";
+  if (platform.includes("mac")) return "macos";
+  if (platform.includes("win")) return "windows";
+  if (platform.includes("linux")) return "linux";
+
+  if (ua.includes("mac os")) return "macos";
+  if (ua.includes("windows")) return "windows";
+  if (ua.includes("linux") || ua.includes("x11")) return "linux";
 
   return "unknown";
 }
