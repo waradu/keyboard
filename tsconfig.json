@@ -20,10 +20,9 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
-    "baseUrl": ".",
     "paths": {
       "@waradu/keyboard": [
-        "src/index.ts"
+        "./src/index.ts"
       ],
     },
   },
