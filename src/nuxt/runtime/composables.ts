@@ -1,10 +1,4 @@
-import type {
-  Handlers,
-  KeySequence,
-  LayerOptions,
-  Options,
-  useKeyboard,
-} from "@waradu/keyboard";
+import type { Handlers, KeySequence, LayerOptions, Options, useKeyboard } from "@waradu/keyboard";
 import { useNuxtApp } from "nuxt/app";
 import { getCurrentInstance, onBeforeUnmount, ref } from "vue";
 
@@ -27,10 +21,7 @@ export function useKeybind(options: Options | Options[]) {
   return off;
 }
 
-export function useKeybindLayer(
-  layers: string | string[],
-  options?: LayerOptions,
-) {
+export function useKeybindLayer(layers: string | string[], options?: LayerOptions) {
   const { $keyboard } = useNuxtApp() as unknown as KeyboardNuxtApp;
 
   const vm = getCurrentInstance();

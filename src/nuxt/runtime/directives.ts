@@ -42,11 +42,7 @@ function cleanup(el: HTMLElement) {
   }
 }
 
-export const vKeybind: Directive<
-  HTMLElement,
-  Options["keys"],
-  "prevent" | "once"
-> = {
+export const vKeybind: Directive<HTMLElement, Options["keys"], "prevent" | "once"> = {
   mounted(el, binding) {
     const shared: SharedState = (el as any)[KEY] ?? ((el as any)[KEY] = {});
 

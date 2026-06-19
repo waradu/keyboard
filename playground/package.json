@@ -1,6 +1,6 @@
 {
-  "private": true,
   "name": "@waradu/keyboard-playground",
+  "private": true,
   "type": "module",
   "scripts": {
     "dev": "nuxt dev",

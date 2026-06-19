@@ -1,9 +1,4 @@
-import {
-  detectOsInBrowser,
-  isEditableElement,
-  parseKeyString,
-  parseKeyData,
-} from "./helper";
+import { detectOsInBrowser, isEditableElement, parseKeyString, parseKeyData } from "./helper";
 import type { KeyData } from "./helper";
 import {
   keys,
@@ -38,9 +33,7 @@ export const useKeyboard = (config?: KeyboardConfig) => {
   config = {
     debug: false,
     stats: true,
-    ...Object.fromEntries(
-      Object.entries(config ?? {}).filter(([, v]) => v !== undefined),
-    ),
+    ...Object.fromEntries(Object.entries(config ?? {}).filter(([, v]) => v !== undefined)),
   };
 
   const instanceSignal = config.signal;
@@ -89,10 +82,7 @@ export const useKeyboard = (config?: KeyboardConfig) => {
           if (platform === "no-macos" && detectedPlatform === "macos") continue;
         }
 
-        let [k, ...mods] = key.split("_").reverse() as [
-          KeyValue,
-          ...ModifierValue[],
-        ];
+        let [k, ...mods] = key.split("_").reverse() as [KeyValue, ...ModifierValue[]];
 
         const pressedKeysArray = Array.from(pressedKeys);
         const firstKey = pressedKeysArray[pressedKeysArray.length - 1];
@@ -104,16 +94,12 @@ export const useKeyboard = (config?: KeyboardConfig) => {
 
         if (
           pressedModifiers.size !== mods.length ||
-          !Array.from(pressedModifiers).every((modifier) =>
-            mods.includes(modifier),
-          )
+          !Array.from(pressedModifiers).every((modifier) => mods.includes(modifier))
         ) {
           continue;
         }
 
-        const hasActiveLayer = l.config.layers?.some(
-          (layer) => !disabledLayers.has(layer),
-        );
+        const hasActiveLayer = l.config.layers?.some((layer) => !disabledLayers.has(layer));
 
         return hasActiveLayer ?? true;
       }
@@ -140,11 +126,7 @@ export const useKeyboard = (config?: KeyboardConfig) => {
         if (Array.isArray(run)) {
           if (
             !run.some((element) => {
-              return (
-                element &&
-                document.activeElement &&
-                element == document.activeElement
-              );
+              return element && document.activeElement && element == document.activeElement;
             })
           )
             return;
@@ -153,17 +135,14 @@ export const useKeyboard = (config?: KeyboardConfig) => {
 
       if (listener.config?.prevent) event.preventDefault();
       if (listener.config?.stop === true) event.stopPropagation();
-      if (listener.config?.stop === "immediate")
-        event.stopImmediatePropagation();
+      if (listener.config?.stop === "immediate") event.stopImmediatePropagation();
       if (listener.config?.stop === "both") {
         event.stopPropagation();
         event.stopImmediatePropagation();
       }
 
       const pressedKeysArray = Array.from(pressedKeys);
-      const pressedNumber = parseInt(
-        pressedKeysArray[pressedKeysArray.length - 1]!,
-      );
+      const pressedNumber = parseInt(pressedKeysArray[pressedKeysArray.length - 1]!);
 
       if (!listener.config.when) {
         return;
@@ -232,10 +211,7 @@ export const useKeyboard = (config?: KeyboardConfig) => {
   };
 
   const stop = (): void => {
-    if (
-      typeof window !== "undefined" &&
-      typeof window.removeEventListener === "function"
-    ) {
+    if (typeof window !== "undefined" && typeof window.removeEventListener === "function") {
       window.removeEventListener("keydown", onKeydown);
       window.removeEventListener("keyup", onKeyup);
       window.removeEventListener("blur", onBlur);
@@ -251,10 +227,7 @@ export const useKeyboard = (config?: KeyboardConfig) => {
 
   const init = async (opts?: { signal?: AbortSignal }) => {
     stop();
-    if (
-      typeof window !== "undefined" &&
-      typeof window.addEventListener === "function"
-    ) {
+    if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
       window.addEventListener("keydown", onKeydown);
       window.addEventListener("keyup", onKeyup);
       window.addEventListener("blur", onBlur);
@@ -267,8 +240,7 @@ export const useKeyboard = (config?: KeyboardConfig) => {
 
       if (!detectedPlatform)
         detectOsInBrowser().then((res) => {
-          if (["macos", "linux", "windows"].includes(res))
-            detectedPlatform = res;
+          if (["macos", "linux", "windows"].includes(res)) detectedPlatform = res;
           log("platform detected as:", res);
         });
 
@@ -305,9 +277,7 @@ export const useKeyboard = (config?: KeyboardConfig) => {
     const results = options
       .map((option) => {
         const cleanConfig = Object.fromEntries(
-          Object.entries(option.config ?? {}).filter(
-            ([, v]) => v !== undefined,
-          ),
+          Object.entries(option.config ?? {}).filter(([, v]) => v !== undefined),
         );
 
         const config: Config = {
@@ -323,9 +293,7 @@ export const useKeyboard = (config?: KeyboardConfig) => {
           option.keys = [option.keys];
         }
 
-        let keys = option.keys.map((key) =>
-          typeof key === "string" ? key : parseKeyData(key),
-        );
+        let keys = option.keys.map((key) => (typeof key === "string" ? key : parseKeyData(key)));
 
         if (keys.includes("any")) {
           keys = ["any"];
@@ -336,8 +304,7 @@ export const useKeyboard = (config?: KeyboardConfig) => {
         const id = Math.random().toString(36).slice(2, 7);
 
         const onAbort = () => unlisten(id);
-        if (config?.signal)
-          config.signal.addEventListener("abort", onAbort, { once: true });
+        if (config?.signal) config.signal.addEventListener("abort", onAbort, { once: true });
 
         const listener: Listener = {
           id,
@@ -365,8 +332,7 @@ export const useKeyboard = (config?: KeyboardConfig) => {
 
     return () => {
       results.forEach((result) => {
-        if (config.signal)
-          config.signal.removeEventListener("abort", result.onAbort);
+        if (config.signal) config.signal.removeEventListener("abort", result.onAbort);
         unlisten(result.id);
       });
     };
@@ -406,10 +372,7 @@ export const useKeyboard = (config?: KeyboardConfig) => {
       cb(sequence);
     };
 
-    if (
-      typeof window !== "undefined" &&
-      typeof window.addEventListener === "function"
-    ) {
+    if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
       window.addEventListener("keydown", handler);
       return () => window.removeEventListener("keydown", handler);
     }

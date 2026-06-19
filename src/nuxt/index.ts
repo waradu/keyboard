@@ -1,12 +1,7 @@
 // oxlint-disable-next-line typescript/triple-slash-reference
 /// <reference path="./index.d.ts" />
 
-import {
-  defineNuxtModule,
-  addPlugin,
-  createResolver,
-  addImports,
-} from "@nuxt/kit";
+import { defineNuxtModule, addPlugin, createResolver, addImports } from "@nuxt/kit";
 import type { Nuxt } from "@nuxt/schema";
 
 export interface ModuleOptions {
