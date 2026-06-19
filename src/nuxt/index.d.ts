@@ -1,6 +1,7 @@
 import type { useKeyboard } from "@waradu/keyboard";
-import type { ModuleOptions } from "./index";
 import type { Directive } from "vue";
+
+import type { ModuleOptions } from "./index";
 import type { vKeybind, vRun } from "./runtime/directives";
 export * from "./index";
 
@@ -30,5 +31,3 @@ declare module "nuxt/schema" {
     keyboard: Partial<ModuleOptions>;
   }
 }
-
-export {};

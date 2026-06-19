@@ -1,5 +1,6 @@
-import type { Directive } from 'vue';
 import type { Options } from "@waradu/keyboard";
+import type { Directive } from "vue";
+
 import { useKeybind } from "./composables";
 
 const KEY = Symbol("keybind-run");
@@ -41,7 +42,11 @@ function cleanup(el: HTMLElement) {
   }
 }
 
-export const vKeybind: Directive<HTMLElement, Options["keys"], "prevent" | "once"> = {
+export const vKeybind: Directive<
+  HTMLElement,
+  Options["keys"],
+  "prevent" | "once"
+> = {
   mounted(el, binding) {
     const shared: SharedState = (el as any)[KEY] ?? ((el as any)[KEY] = {});
 
@@ -54,7 +59,6 @@ export const vKeybind: Directive<HTMLElement, Options["keys"], "prevent" | "once
     cleanup(el);
   },
 };
-
 
 export const vRun: Directive<HTMLElement, Options["run"]> = {
   mounted(el, binding) {

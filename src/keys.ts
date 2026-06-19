@@ -140,22 +140,25 @@ export type ModifierValue = (typeof modifiers)[keyof typeof modifiers];
 export type KeyValue = (typeof keys)[keyof typeof keys];
 export type PlatformValue = (typeof platforms)[keyof typeof platforms];
 
-type FixedCombinations<T extends readonly string[], Acc extends string[] = []> = T extends [
-  infer F extends string,
-  ...infer R extends string[],
-]
+type FixedCombinations<
+  T extends readonly string[],
+  Acc extends string[] = [],
+> = T extends [infer F extends string, ...infer R extends string[]]
   ? FixedCombinations<R, Acc> | FixedCombinations<R, [...Acc, F]>
   : Acc;
 
-type PrefixTuples = Exclude<FixedCombinations<["meta", "control", "alt", "shift"]>, []>;
+type PrefixTuples = Exclude<
+  FixedCombinations<["meta", "control", "alt", "shift"]>,
+  []
+>;
 
 type Join<T extends readonly string[], Sep extends string> = T extends []
   ? ""
   : T extends [infer F extends string]
-  ? F
-  : T extends [infer F extends string, ...infer R extends readonly string[]]
-  ? `${F}${Sep}${Join<R, Sep>}`
-  : string;
+    ? F
+    : T extends [infer F extends string, ...infer R extends readonly string[]]
+      ? `${F}${Sep}${Join<R, Sep>}`
+      : string;
 
 type WithModifier = `${Join<PrefixTuples, "_">}_${KeyValue}`;
 

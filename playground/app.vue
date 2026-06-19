@@ -3,9 +3,12 @@
   <footer>
     <span>Active listeners:</span>
     <ClientOnly>
-      <div v-for="(listener, i) in listeners" style="display: flex; align-items: center; gap: 8px">
+      <div
+        v-for="(listener, i) in listeners"
+        style="display: flex; align-items: center; gap: 8px"
+      >
         <pre>{{ listener.id }}:</pre>
-        <template v-for="sequence, j in formattedListeners[i]!">
+        <template v-for="(sequence, j) in formattedListeners[i]!">
           <span v-if="sequence.platform"> {{ sequence.platform }}: </span>
           <template v-if="sequence.modifiers">
             <span>
@@ -22,11 +25,14 @@
         </template>
         <span>{{ listener.config.once ? "(once)" : "" }}</span>
         <span>{{
-          listener.config.layers ? `(layer: ${listener.config.layers.join(", ")})` : ""
+          listener.config.layers
+            ? `(layer: ${listener.config.layers.join(", ")})`
+            : ""
         }}</span>
         <span>(cound: {{ listener.stats.count }})</span>
         <span v-if="listener.stats.lastTrigger"
-          >(last: {{ listener.stats.lastTrigger.toTimeString().slice(0, 8) }})</span
+          >(last:
+          {{ listener.stats.lastTrigger.toTimeString().slice(0, 8) }})</span
         >
       </div>
     </ClientOnly>

@@ -1,9 +1,6 @@
 {
   "compilerOptions": {
-    "lib": [
-      "ESNext",
-      "DOM"
-    ],
+    "lib": ["ESNext", "DOM"],
     "target": "ESNext",
     "module": "ESNext",
     "moduleDetection": "force",
@@ -21,12 +18,8 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
     "paths": {
-      "@waradu/keyboard": [
-        "./src/index.ts"
-      ],
-    },
+      "@waradu/keyboard": ["./src/index.ts"]
+    }
   },
-  "exclude": [
-    "playground"
-  ]
+  "exclude": ["playground"]
 }

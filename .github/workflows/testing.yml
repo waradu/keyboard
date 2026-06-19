@@ -1,29 +1,41 @@
+name: Validate
+
 on:
   push:
-    branches:
-      - main
   pull_request:
-    branches:
-      - main
 
-name: testing
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  tests:
-    name: tests
+  checks:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        task: [test, test-types]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
+    timeout-minutes: 10
 
-      - name: Cache bun
-        uses: actions/cache@v3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
         with:
-          path: ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-bun-
-      - run: bun install --frozen-lockfile
-      - run: bun ${{ matrix.task }}
+          node-version: 24
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun ci
+
+      - name: Test
+        run: bun test
+
+      - name: Test Types
+        run: bun test-types
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Format check
+        run: bun run format:check
+
+      - name: Build
+        run: bun run build

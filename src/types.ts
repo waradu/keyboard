@@ -61,7 +61,7 @@ export interface Config {
   /**
    * Boolean value or predicate function before each run whether the listener should run.
    */
-  when?: boolean | (() => (boolean | Promise<boolean>));
+  when?: boolean | (() => boolean | Promise<boolean>);
 
   signal?: AbortSignal;
 }
@@ -108,7 +108,7 @@ export interface Listener {
   config: Config;
 
   stats: ListenerStats;
-};
+}
 
 export type Handlers = Listener[];
 

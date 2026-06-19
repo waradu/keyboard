@@ -1,7 +1,9 @@
 <template>
   <div>TEST</div>
   <NuxtLink to="/">index</NuxtLink>
-  <pre>Info: ctrl/cmd + r to reload page is prevent as an example on this page.</pre>
+  <pre>
+Info: ctrl/cmd + r to reload page is prevent as an example on this page.</pre
+  >
   <input
     type="text"
     v-keybind="'enter'"

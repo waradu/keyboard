@@ -1,6 +1,12 @@
+// oxlint-disable-next-line typescript/triple-slash-reference
 /// <reference path="./index.d.ts" />
 
-import { defineNuxtModule, addPlugin, createResolver, addImports } from "@nuxt/kit";
+import {
+  defineNuxtModule,
+  addPlugin,
+  createResolver,
+  addImports,
+} from "@nuxt/kit";
 import type { Nuxt } from "@nuxt/schema";
 
 export interface ModuleOptions {
@@ -29,25 +35,25 @@ export default defineNuxtModule<ModuleOptions>({
     addImports({
       as: "useKeybind",
       name: "useKeybind",
-      from: resolve("./runtime/composables")
+      from: resolve("./runtime/composables"),
     });
 
     addImports({
       as: "useKeybindLayer",
       name: "useKeybindLayer",
-      from: resolve("./runtime/composables")
+      from: resolve("./runtime/composables"),
     });
 
     addImports({
       as: "useKeyboardInspector",
       name: "useKeyboardInspector",
-      from: resolve("./runtime/composables")
+      from: resolve("./runtime/composables"),
     });
 
     addImports({
       as: "useKeybindRecorder",
       name: "useKeybindRecorder",
-      from: resolve("./runtime/composables")
+      from: resolve("./runtime/composables"),
     });
-  }
+  },
 });

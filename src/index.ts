@@ -1,4 +1,9 @@
-import { detectOsInBrowser, isEditableElement, parseKeyString, parseKeyData } from "./helper";
+import {
+  detectOsInBrowser,
+  isEditableElement,
+  parseKeyString,
+  parseKeyData,
+} from "./helper";
 import type { KeyData } from "./helper";
 import {
   keys,
@@ -11,7 +16,18 @@ import {
   type ModifierValue,
   type PlatformValue,
 } from "./keys";
-import type { Config, Handlers, KeyboardConfig, Handler, HandlerContext, Options, Os, Listener, SubscribeCallback, LayerOptions } from "./types";
+import type {
+  Config,
+  Handlers,
+  KeyboardConfig,
+  Handler,
+  HandlerContext,
+  Options,
+  Os,
+  Listener,
+  SubscribeCallback,
+  LayerOptions,
+} from "./types";
 
 /**
  * Create a keyboard listener.
@@ -23,7 +39,7 @@ export const useKeyboard = (config?: KeyboardConfig) => {
     debug: false,
     stats: true,
     ...Object.fromEntries(
-      Object.entries(config ?? {}).filter(([, v]) => v !== undefined)
+      Object.entries(config ?? {}).filter(([, v]) => v !== undefined),
     ),
   };
 
@@ -73,7 +89,10 @@ export const useKeyboard = (config?: KeyboardConfig) => {
           if (platform === "no-macos" && detectedPlatform === "macos") continue;
         }
 
-        let [k, ...mods] = key.split("_").reverse() as [KeyValue, ...ModifierValue[]];
+        let [k, ...mods] = key.split("_").reverse() as [
+          KeyValue,
+          ...ModifierValue[],
+        ];
 
         const pressedKeysArray = Array.from(pressedKeys);
         const firstKey = pressedKeysArray[pressedKeysArray.length - 1];
@@ -84,13 +103,17 @@ export const useKeyboard = (config?: KeyboardConfig) => {
         }
 
         if (
-          Array.from(pressedModifiers).length !== mods.length ||
-          !Array.from(pressedModifiers).every((modifier) => mods.includes(modifier))
+          pressedModifiers.size !== mods.length ||
+          !Array.from(pressedModifiers).every((modifier) =>
+            mods.includes(modifier),
+          )
         ) {
           continue;
         }
 
-        const hasActiveLayer = l.config.layers?.some(layer => !disabledLayers.has(layer));
+        const hasActiveLayer = l.config.layers?.some(
+          (layer) => !disabledLayers.has(layer),
+        );
 
         return hasActiveLayer ?? true;
       }
@@ -117,7 +140,11 @@ export const useKeyboard = (config?: KeyboardConfig) => {
         if (Array.isArray(run)) {
           if (
             !run.some((element) => {
-              return element && document.activeElement && element == document.activeElement;
+              return (
+                element &&
+                document.activeElement &&
+                element == document.activeElement
+              );
             })
           )
             return;
@@ -126,14 +153,17 @@ export const useKeyboard = (config?: KeyboardConfig) => {
 
       if (listener.config?.prevent) event.preventDefault();
       if (listener.config?.stop === true) event.stopPropagation();
-      if (listener.config?.stop === "immediate") event.stopImmediatePropagation();
+      if (listener.config?.stop === "immediate")
+        event.stopImmediatePropagation();
       if (listener.config?.stop === "both") {
         event.stopPropagation();
         event.stopImmediatePropagation();
       }
 
       const pressedKeysArray = Array.from(pressedKeys);
-      const pressedNumber = parseInt(pressedKeysArray[pressedKeysArray.length - 1]!);
+      const pressedNumber = parseInt(
+        pressedKeysArray[pressedKeysArray.length - 1]!,
+      );
 
       if (!listener.config.when) {
         return;
@@ -154,7 +184,7 @@ export const useKeyboard = (config?: KeyboardConfig) => {
       });
 
       if (config.stats) {
-        listeners.forEach(async l => {
+        listeners.forEach(async (l) => {
           if (l.id == listener.id) {
             l.stats.count += 1;
             l.stats.lastTrigger = new Date();
@@ -202,7 +232,10 @@ export const useKeyboard = (config?: KeyboardConfig) => {
   };
 
   const stop = (): void => {
-    if (typeof window !== "undefined" && typeof window.removeEventListener === "function") {
+    if (
+      typeof window !== "undefined" &&
+      typeof window.removeEventListener === "function"
+    ) {
       window.removeEventListener("keydown", onKeydown);
       window.removeEventListener("keyup", onKeyup);
       window.removeEventListener("blur", onBlur);
@@ -216,9 +249,12 @@ export const useKeyboard = (config?: KeyboardConfig) => {
     clear();
   };
 
-  const init = async (opts?: { signal?: AbortSignal; }) => {
+  const init = async (opts?: { signal?: AbortSignal }) => {
     stop();
-    if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
+    if (
+      typeof window !== "undefined" &&
+      typeof window.addEventListener === "function"
+    ) {
       window.addEventListener("keydown", onKeydown);
       window.addEventListener("keyup", onKeyup);
       window.addEventListener("blur", onBlur);
@@ -231,7 +267,8 @@ export const useKeyboard = (config?: KeyboardConfig) => {
 
       if (!detectedPlatform)
         detectOsInBrowser().then((res) => {
-          if (["macos", "linux", "windows"].includes(res)) detectedPlatform = res;
+          if (["macos", "linux", "windows"].includes(res))
+            detectedPlatform = res;
           log("platform detected as:", res);
         });
 
@@ -257,9 +294,9 @@ export const useKeyboard = (config?: KeyboardConfig) => {
       options = [options];
     }
 
-    options.forEach(option => {
+    options.forEach((option) => {
       if (option.config?.layers) {
-        for (const layer of option.config?.layers) {
+        for (const layer of option.config.layers) {
           allLayers.add(layer);
         }
       }
@@ -268,7 +305,9 @@ export const useKeyboard = (config?: KeyboardConfig) => {
     const results = options
       .map((option) => {
         const cleanConfig = Object.fromEntries(
-          Object.entries(option.config ?? {}).filter(([, v]) => v !== undefined)
+          Object.entries(option.config ?? {}).filter(
+            ([, v]) => v !== undefined,
+          ),
         );
 
         const config: Config = {
@@ -284,7 +323,9 @@ export const useKeyboard = (config?: KeyboardConfig) => {
           option.keys = [option.keys];
         }
 
-        let keys = option.keys.map(key => typeof key === "string" ? key : parseKeyData(key));
+        let keys = option.keys.map((key) =>
+          typeof key === "string" ? key : parseKeyData(key),
+        );
 
         if (keys.includes("any")) {
           keys = ["any"];
@@ -295,7 +336,8 @@ export const useKeyboard = (config?: KeyboardConfig) => {
         const id = Math.random().toString(36).slice(2, 7);
 
         const onAbort = () => unlisten(id);
-        if (config?.signal) config.signal.addEventListener("abort", onAbort, { once: true });
+        if (config?.signal)
+          config.signal.addEventListener("abort", onAbort, { once: true });
 
         const listener: Listener = {
           id,
@@ -307,8 +349,8 @@ export const useKeyboard = (config?: KeyboardConfig) => {
 
           stats: {
             count: 0,
-            lastTrigger: null
-          }
+            lastTrigger: null,
+          },
         };
 
         listeners.push(listener);
@@ -323,7 +365,8 @@ export const useKeyboard = (config?: KeyboardConfig) => {
 
     return () => {
       results.forEach((result) => {
-        if (config.signal) config.signal.removeEventListener("abort", result.onAbort);
+        if (config.signal)
+          config.signal.removeEventListener("abort", result.onAbort);
         unlisten(result.id);
       });
     };
@@ -363,17 +406,19 @@ export const useKeyboard = (config?: KeyboardConfig) => {
       cb(sequence);
     };
 
-    if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
+    if (
+      typeof window !== "undefined" &&
+      typeof window.addEventListener === "function"
+    ) {
       window.addEventListener("keydown", handler);
       return () => window.removeEventListener("keydown", handler);
     }
 
     log("ERROR: window was not found");
-    return () => { };
+    return () => {};
   };
 
-  const layers =
-  {
+  const layers = {
     /**
      * Create new keybind layer.
      */
@@ -386,7 +431,7 @@ export const useKeyboard = (config?: KeyboardConfig) => {
 
       layerOptions = {
         enabled: true,
-        ...layerOptions
+        ...layerOptions,
       };
 
       return {
@@ -440,9 +485,9 @@ export const useKeyboard = (config?: KeyboardConfig) => {
             options = [options];
           }
 
-          options.forEach(option => {
+          options.forEach((option) => {
             if (!option.config) option.config = {};
-            option.config.layers = [...option.config.layers ?? [], ...layers];
+            option.config.layers = [...(option.config.layers ?? []), ...layers];
           });
 
           if (!layerOptions.enabled) {
@@ -462,7 +507,7 @@ export const useKeyboard = (config?: KeyboardConfig) => {
           for (const off of offs) {
             off();
           }
-        }
+        },
       };
     },
     /**
@@ -517,11 +562,11 @@ export const useKeyboard = (config?: KeyboardConfig) => {
       for (const layer of allLayers) {
         disabledLayers.add(layer);
       }
-    }
+    },
   };
 
   const exists = (sequence: KeyString) => {
-    return listeners.some(listener => listener.keys.includes(sequence));
+    return listeners.some((listener) => listener.keys.includes(sequence));
   };
 
   return {
@@ -567,8 +612,8 @@ export const useKeyboard = (config?: KeyboardConfig) => {
      *
      * The callback is called:
      * - once immediately with the current listeners
-    * - on every add/remove/clear of listeners
-    *
+     * - on every add/remove/clear of listeners
+     *
      * @param callback Receives the current list of listeners on each change.
      * @returns Function to unsubscribe from further updates.
      */
@@ -587,7 +632,7 @@ export const useKeyboard = (config?: KeyboardConfig) => {
     /**
      * Check if Key String listener already exists.
      */
-    exists
+    exists,
   };
 };
 

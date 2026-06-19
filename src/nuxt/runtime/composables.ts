@@ -1,12 +1,18 @@
-import { getCurrentInstance, onBeforeUnmount, ref } from "vue";
+import type {
+  Handlers,
+  KeySequence,
+  LayerOptions,
+  Options,
+  useKeyboard,
+} from "@waradu/keyboard";
 import { useNuxtApp } from "nuxt/app";
-import type { Handlers, KeySequence, LayerOptions, Options, useKeyboard } from "@waradu/keyboard";
+import { getCurrentInstance, onBeforeUnmount, ref } from "vue";
 
-interface KeyboardNuxtApp { $keyboard: ReturnType<typeof useKeyboard>; }
+interface KeyboardNuxtApp {
+  $keyboard: ReturnType<typeof useKeyboard>;
+}
 
-export function useKeybind(
-  options: Options | Options[]
-) {
+export function useKeybind(options: Options | Options[]) {
   const { $keyboard } = useNuxtApp() as unknown as KeyboardNuxtApp;
 
   const vm = getCurrentInstance();
@@ -23,7 +29,7 @@ export function useKeybind(
 
 export function useKeybindLayer(
   layers: string | string[],
-  options?: LayerOptions
+  options?: LayerOptions,
 ) {
   const { $keyboard } = useNuxtApp() as unknown as KeyboardNuxtApp;
 

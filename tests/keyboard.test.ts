@@ -1,7 +1,8 @@
-import { parseKeyData, parseKeyString, useKeyboard } from "@waradu/keyboard";
 import { test, expect, mock, type Mock } from "bun:test";
-import type { HandlerContext, Os } from "src/types";
+
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
+import { parseKeyData, parseKeyString, useKeyboard } from "@waradu/keyboard";
+import type { HandlerContext, Os } from "src/types";
 
 GlobalRegistrator.register();
 
@@ -12,7 +13,9 @@ const prepare = (platform?: Os) => {
   keyboard.init();
 
   // Should return void but we need to return the context to check for the template.
-  const spy = mock((context: HandlerContext) => [context]) as unknown as Mock<() => void>;
+  const spy = mock((context: HandlerContext) => [context]) as unknown as Mock<
+    () => void
+  >;
 
   return { keyboard, spy };
 };
@@ -286,7 +289,7 @@ test("parse key string into key data", () => {
       control: false,
       meta: false,
       shift: false,
-    }
+    },
   });
 
   expect(parseKeyString("meta_control_alt_shift_arrow-up")).toEqual({
@@ -296,7 +299,7 @@ test("parse key string into key data", () => {
       control: true,
       meta: true,
       shift: true,
-    }
+    },
   });
 
   expect(parseKeyString("macos:x")).toEqual({
@@ -307,7 +310,7 @@ test("parse key string into key data", () => {
       control: false,
       meta: false,
       shift: false,
-    }
+    },
   });
 
   expect(parseKeyString("alt_$num")).toEqual({
@@ -317,7 +320,7 @@ test("parse key string into key data", () => {
       control: false,
       meta: false,
       shift: false,
-    }
+    },
   });
 
   expect(parseKeyString("any")).toEqual({
@@ -327,7 +330,7 @@ test("parse key string into key data", () => {
       control: false,
       meta: false,
       shift: false,
-    }
+    },
   });
 
   //@ts-expect-error out of order
@@ -339,36 +342,46 @@ test("parse key string into key data", () => {
 });
 
 test("parse key data into key string", () => {
-  expect(parseKeyData({
-    key: "x",
-    modifiers: {}
-  })).toEqual("x");
+  expect(
+    parseKeyData({
+      key: "x",
+      modifiers: {},
+    }),
+  ).toEqual("x");
 
-  expect(parseKeyData({
-    key: "arrow-up",
-    modifiers: {
-      alt: true,
-      control: true,
-      meta: true,
-      shift: true,
-    },
-  })).toEqual("meta_control_alt_shift_arrow-up");
+  expect(
+    parseKeyData({
+      key: "arrow-up",
+      modifiers: {
+        alt: true,
+        control: true,
+        meta: true,
+        shift: true,
+      },
+    }),
+  ).toEqual("meta_control_alt_shift_arrow-up");
 
-  expect(parseKeyData({
-    platform: "macos",
-    key: "x",
-    modifiers: {},
-  })).toEqual("macos:x");
+  expect(
+    parseKeyData({
+      platform: "macos",
+      key: "x",
+      modifiers: {},
+    }),
+  ).toEqual("macos:x");
 
-  expect(parseKeyData({
-    key: "$num",
-    modifiers: {
-      alt: true
-    },
-  })).toEqual("alt_$num");
+  expect(
+    parseKeyData({
+      key: "$num",
+      modifiers: {
+        alt: true,
+      },
+    }),
+  ).toEqual("alt_$num");
 
-  expect(parseKeyData({
-    key: "any",
-    modifiers: {},
-  })).toEqual("any");
+  expect(
+    parseKeyData({
+      key: "any",
+      modifiers: {},
+    }),
+  ).toEqual("any");
 });
