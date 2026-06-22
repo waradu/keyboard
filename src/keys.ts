@@ -138,9 +138,9 @@ export type ModifierKey = keyof typeof modifiers;
 export type KeyKey = keyof typeof keys;
 export type PlatformKey = keyof typeof platforms;
 
-export type ModifierValue = (typeof modifiers)[keyof typeof modifiers];
-export type KeyValue = (typeof keys)[keyof typeof keys];
-export type PlatformValue = (typeof platforms)[keyof typeof platforms];
+export type ModifierValue = (typeof modifiers)[ModifierKey];
+export type KeyValue = (typeof keys)[KeyKey];
+export type PlatformValue = (typeof platforms)[PlatformKey];
 
 type FixedCombinations<T extends readonly string[], Acc extends string[] = []> = T extends [
   infer F extends string,
