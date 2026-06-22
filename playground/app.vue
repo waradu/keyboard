@@ -7,10 +7,17 @@
         <pre>{{ listener.id }}:</pre>
         <template v-for="(sequence, j) in formattedListeners[i]!">
           <span v-if="sequence.platform"> {{ sequence.platform }}: </span>
-          <template v-if="sequence.modifiers">
+          <template
+            v-if="
+              Object.entries(sequence.modifiers)
+                .filter((seq) => seq[1])
+                .map((seq) => seq[0]).length
+            "
+          >
             <span>
               {{
                 Object.entries(sequence.modifiers)
+                  .filter((seq) => seq[1])
                   .map((seq) => seq[0])
                   .join(" + ")
               }}
