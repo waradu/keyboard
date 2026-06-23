@@ -115,13 +115,13 @@ export const parseCreateKeybindShape = (shape: CreateKeybindShape): KeybindShape
 };
 
 export const isEditableElement = (element: Element): boolean => {
-  const editableElements = [
-    "INPUT",
-    "TEXTAREA",
-    '[contenteditable="true"]',
-    '[contenteditable="plaintext-only"]',
-  ];
-  return editableElements.some((selector) => element.matches(selector));
+  if (element.matches("INPUT, TEXTAREA")) return true;
+
+  const contentEditable = element.closest("[contenteditable]");
+  if (!contentEditable) return false;
+
+  const value = contentEditable.getAttribute("contenteditable")?.toLowerCase();
+  return value === "" || value === "true" || value === "plaintext-only";
 };
 
 export function detectOsInBrowser(): Os {

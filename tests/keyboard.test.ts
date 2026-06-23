@@ -109,6 +109,59 @@ test("keyboard handler ignores editable if set", () => {
   keyboard.destroy();
 });
 
+test("keyboard handler ignores focused descendants in contenteditable containers", () => {
+  const { keyboard, spy } = prepare();
+
+  keyboard.bind({
+    keys: ["a"],
+    run: spy,
+    config: { ignoreIfEditable: true },
+  });
+
+  const editor = document.createElement("div");
+  editor.contentEditable = "true";
+  const child = document.createElement("span");
+  child.tabIndex = 0;
+  editor.appendChild(child);
+  document.body.appendChild(editor);
+
+  child.focus();
+
+  press("a");
+
+  expect(spy).toHaveBeenCalledTimes(0);
+
+  editor.remove();
+  keyboard.destroy();
+});
+
+test("keyboard handler runs in non-editable contenteditable descendants", () => {
+  const { keyboard, spy } = prepare();
+
+  keyboard.bind({
+    keys: ["a"],
+    run: spy,
+    config: { ignoreIfEditable: true },
+  });
+
+  const editor = document.createElement("div");
+  editor.contentEditable = "true";
+  const child = document.createElement("span");
+  child.contentEditable = "false";
+  child.tabIndex = 0;
+  editor.appendChild(child);
+  document.body.appendChild(editor);
+
+  child.focus();
+
+  press("a");
+
+  expect(spy).toHaveBeenCalledTimes(1);
+
+  editor.remove();
+  keyboard.destroy();
+});
+
 test("keyboard handler runs only if runIfFocused element is focused", () => {
   const { keyboard, spy } = prepare();
 
