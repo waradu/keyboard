@@ -14,6 +14,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
   const keyboard = new Keyboard({
     debug: (opts as ModuleOptions).debug,
+    noInit: true,
   });
 
   nuxtApp.hook("app:mounted", () => {

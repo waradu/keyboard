@@ -26,7 +26,7 @@ export class Keyboard {
   private pressed = new Set<KeyValue>();
 
   constructor(private config: KeyboardConfig = {}) {
-    this.init();
+    if (!config.noInit) this.init();
   }
 
   private log(...data: any[]) {

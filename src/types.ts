@@ -11,9 +11,14 @@ export interface KeyboardConfig {
 
   /**
    * Platform of the user. Set this manually to override automatic detection.
-   * If not set, `keyboard.init` will try to detect the platform itself.
+   * If not set, the package will try to detect the platform itself.
    */
   platform?: Os;
+
+  /**
+   * Disbale the automatic initialization attempt if window is available.
+   */
+  noInit?: boolean;
 
   signal?: AbortSignal;
 }
