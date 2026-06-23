@@ -24,6 +24,8 @@ export class Keyboard {
   private disabledLayers = new Set<string>();
   private subscribers: SubscribeCallback[] = [];
   private pressed = new Set<KeyValue>();
+  ready: boolean = false;
+  paused: boolean = false;
 
   constructor(private config: KeyboardConfig = {}) {
     if (!config.noInit) this.init();
@@ -186,6 +188,8 @@ export class Keyboard {
       window.removeEventListener("keyup", this.onKeyup);
       window.removeEventListener("blur", this.onBlur);
 
+      this.ready = false;
+
       this.log("stopped");
     }
   }
@@ -200,6 +204,27 @@ export class Keyboard {
   }
 
   /**
+   * Temporarily pause listener
+   */
+  pause() {
+    this.paused = true;
+  }
+
+  /**
+   * Resume listener
+   */
+  resume() {
+    this.paused = false;
+  }
+
+  /**
+   * Toggle paused state
+   */
+  toggle() {
+    this.paused = !this.paused;
+  }
+
+  /**
    * Initialize the keyboard. Call this when `window` is available (it will fail silently).
    * You can define listeners bevore initializing.
    */
@@ -210,6 +235,8 @@ export class Keyboard {
       window.addEventListener("keydown", this.onKeydown);
       window.addEventListener("keyup", this.onKeyup);
       window.addEventListener("blur", this.onBlur);
+
+      this.ready = true;
 
       const abortSignal = opts?.signal ?? this.config.signal;
       if (abortSignal) {
