@@ -431,19 +431,19 @@ export class Keyboard {
 
       return {
         /**
-         * Disable these layers
+         * Disable this layer
          */
         disable: () => {
           this.disabledLayers.add(layer);
         },
         /**
-         * Enable these layers
+         * Enable this layer
          */
         enable: () => {
           this.disabledLayers.delete(layer);
         },
         /**
-         * Enable these layers
+         * Enable this layer
          */
         toggle: () => {
           if (this.disabledLayers.has(layer)) {
@@ -462,7 +462,7 @@ export class Keyboard {
           return binding;
         }) as typeof this.bind,
         /**
-         * Disables all listeners in layer.
+         * Disables all listeners in this layer.
          */
         off: () => {
           for (const off of offs) {
@@ -484,7 +484,7 @@ export class Keyboard {
       }
     },
     /**
-     * Disable all layers.
+     * Disable specific layers.
      */
     disable: (layers: string | string[]) => {
       if (!Array.isArray(layers)) {
