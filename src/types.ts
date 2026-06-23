@@ -16,7 +16,7 @@ export interface KeyboardConfig {
   platform?: Os;
 
   /**
-   * Disbale the automatic initialization attempt if window is available.
+   * Disable the automatic initialization attempt if window is available.
    */
   noInit?: boolean;
 
@@ -51,13 +51,13 @@ export interface Config {
   prevent?: boolean;
   /**
    * Stop propagation.
-   * Note: this won't prevent other keyboard listeners on the same instance. You have to handle this youself.
+   * Note: this won't prevent other keyboard listeners on the same instance. You have to handle this yourself.
    *
    * Possible values:
    * - `true`:
    *   Calls `event.stopPropagation()`, preventing the event from reaching parent targets but allowing any remaining listeners on this same element to run.
    * - `"immediate"`:
-   *   Calls `event.stopImmediatePropagation()`, preventing any further listeners on this same element from running, but still allowing the event to bubble to parent targets.
+   *   Calls `event.stopImmediatePropagation()`, preventing any further listeners on this same element and parents from running.
    * - `"both"`:
    *   Stop *immediate* propagation (no further listeners on this same target)
    *   **and** prevent any propagation to parent targets.
@@ -66,7 +66,7 @@ export interface Config {
    */
   stop?: "immediate" | "both" | boolean;
   /**
-   * Ignore listener if the user currently is in a editable element like input or textarea.
+   * Ignore listener if the user currently is in an editable element like input or textarea.
    * @default false
    */
   ignoreIfEditable?: boolean;

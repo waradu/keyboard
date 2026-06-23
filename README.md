@@ -2,7 +2,7 @@
 
 A keyboard manager compatible with TypeScript and Nuxt.
 
-[![testing](https://github.com/Waradu/keyboard/actions/workflows/testing.yml/badge.svg)](https://github.com/Waradu/keyboard/actions/workflows/testing.yml)
+[![validate](https://github.com/Waradu/keyboard/actions/workflows/validate.yml/badge.svg)](https://github.com/Waradu/keyboard/actions/workflows/validate.yml)
 
 - [Install](#install)
 - [Get Started](#get-started)

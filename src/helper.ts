@@ -80,7 +80,7 @@ export const parseKeyString = (sequence: KeyString): KeybindShape | undefined =>
   for (const mod of modifiersOnly) {
     if (!modSet.has(mod)) return;
     const idx = MOD_ORDER.indexOf(mod);
-    if (idx === -1 || idx < lastIndex) return;
+    if (idx === -1 || idx <= lastIndex) return;
     lastIndex = idx;
   }
 

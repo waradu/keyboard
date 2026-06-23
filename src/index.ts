@@ -36,6 +36,7 @@ export class Keyboard {
   }
 
   private onKeydown = (event: KeyboardEvent) => {
+    if (this.paused) return;
     if (event.isComposing) return;
 
     const eventKey = event.key.toLowerCase();
@@ -226,7 +227,7 @@ export class Keyboard {
 
   /**
    * Initialize the keyboard. Call this when `window` is available (it will fail silently).
-   * You can define listeners bevore initializing.
+   * You can define listeners before initializing.
    */
   async init(opts?: { signal?: AbortSignal }) {
     this.stop();
@@ -271,7 +272,7 @@ export class Keyboard {
    * Create new handlers.
    *
    * @param options Multiple handlers with options.
-   * @param config The config that gets applied to all handler.
+   * @param config The config that gets applied to all handlers.
    * @returns Unlisten function
    *
    * @example
@@ -315,7 +316,7 @@ export class Keyboard {
         when: true,
       });
 
-      local.layers = layers;
+      local.layers = [...(local.layers ?? []), ...(config.layers ?? [])];
 
       if (local.signal?.aborted) return;
 
