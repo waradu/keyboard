@@ -1,70 +1,58 @@
-import type { Options } from "@waradu/keyboard";
+import type { Options, KeyValue } from "@waradu/keyboard";
 import type { Directive } from "vue";
 
 import { useKeybind } from "./composables";
 
-const KEY = Symbol("keybind-run");
+const KEY = Symbol("keybind");
 
-type SharedState = {
-  run?: Options["run"];
-  keys?: Options["keys"];
-  off?: () => void;
-  modifiers?: {
-    prevent?: boolean;
-    once?: boolean;
-  };
-  registered?: boolean;
+type KeybindDirectiveModifier = "alt" | "control" | "meta" | "once" | "prevent" | "shift";
+
+type KeybindElement = HTMLElement & {
+  [KEY]?: () => void;
 };
 
-function tryRegister(el: HTMLElement, shared: SharedState) {
-  if (!shared.run || !shared.keys || shared.registered || !el) return;
+function cleanup(el: KeybindElement) {
+  el[KEY]?.();
+  el[KEY] = undefined;
+}
 
-  shared.off = useKeybind({
-    keys: shared.keys,
-    run: shared.run,
+function register(
+  el: KeybindElement,
+  arg: KeyValue | undefined,
+  modifiers: Record<string, boolean>,
+  run: Options["run"],
+) {
+  cleanup(el);
+  if (!arg || typeof run !== "function") return;
+
+  el[KEY] = useKeybind({
+    keys: {
+      key: arg,
+      modifiers: {
+        alt: modifiers.alt,
+        control: modifiers.control,
+        meta: modifiers.meta,
+        shift: modifiers.shift,
+      },
+    },
+    run,
     config: {
-      prevent: shared.modifiers?.prevent,
-      once: shared.modifiers?.once,
+      prevent: modifiers.prevent,
+      once: modifiers.once,
       runIfFocused: [el],
     },
   });
-
-  shared.registered = true;
 }
 
-function cleanup(el: HTMLElement) {
-  const shared: SharedState | undefined = (el as any)[KEY];
-
-  shared?.off?.();
-  if (shared) {
-    shared.registered = false;
-    shared.off = undefined;
-  }
-}
-
-export const vKeybind: Directive<HTMLElement, Options["keys"], "prevent" | "once"> = {
-  mounted(el, binding) {
-    const shared: SharedState = (el as any)[KEY] ?? ((el as any)[KEY] = {});
-
-    shared.modifiers = { ...binding.modifiers };
-    shared.keys = binding.value;
-
-    tryRegister(el, shared);
-  },
-  unmounted(el) {
-    cleanup(el);
-  },
-};
-
-export const vRun: Directive<HTMLElement, Options["run"]> = {
-  mounted(el, binding) {
-    const shared: SharedState = (el as any)[KEY] ?? ((el as any)[KEY] = {});
-
-    shared.run = binding.value;
-
-    tryRegister(el, shared);
-  },
-  unmounted(el) {
-    cleanup(el);
-  },
-};
+export const vKeybind: Directive<HTMLElement, Options["run"], KeybindDirectiveModifier, KeyValue> =
+  {
+    mounted(el, binding) {
+      register(el, binding.arg, binding.modifiers, binding.value);
+    },
+    updated(el, binding) {
+      register(el, binding.arg, binding.modifiers, binding.value);
+    },
+    unmounted(el) {
+      cleanup(el);
+    },
+  };

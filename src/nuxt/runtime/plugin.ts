@@ -2,14 +2,13 @@ import { Keyboard } from "@waradu/keyboard";
 import { defineNuxtPlugin, useRuntimeConfig } from "nuxt/app";
 
 import type { ModuleOptions } from "../index";
-import { vKeybind, vRun } from "./directives";
+import { vKeybind } from "./directives";
 
 export default defineNuxtPlugin((nuxtApp) => {
   const {
     public: { keyboard: opts },
   } = useRuntimeConfig();
 
-  nuxtApp.vueApp.directive("run", vRun);
   nuxtApp.vueApp.directive("keybind", vKeybind);
 
   const keyboard = new Keyboard({

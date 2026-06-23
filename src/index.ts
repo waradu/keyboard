@@ -6,7 +6,15 @@ import {
   detectOsInBrowser,
   isEditableElement,
 } from "./helper";
-import { ANYKEY, keys, type KeyKey, type KeySequence, type KeyString, type KeyValue } from "./keys";
+import {
+  ANYKEY,
+  keys,
+  type KeyKey,
+  type KeySequence,
+  type KeyString,
+  type KeyValue,
+  type ModifierValue,
+} from "./keys";
 import type {
   KeyboardConfig,
   Config,
@@ -570,5 +578,7 @@ export type {
   HandlerContext,
   KeySequence,
   KeybindShape,
+  KeyValue,
+  ModifierValue,
 };
 export { parseKeyString };

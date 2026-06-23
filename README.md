@@ -401,13 +401,12 @@ Available handler config:
 
 ## Directives
 
-Directives are Nuxt-only. Combine `v-keybind` and `v-run` on the same element.
+Directives are Nuxt-only. Pass the handler to `v-keybind` and use the directive arg as the key.
 
 ```html
 <input
   type="text"
-  v-keybind="'enter'"
-  v-run="
+  v-keybind:enter="
     () => {
       console.log('Hello, directive!');
     }
@@ -415,27 +414,19 @@ Directives are Nuxt-only. Combine `v-keybind` and `v-run` on the same element.
 />
 ```
 
-Use modifiers for `prevent` and `once`:
+Use directive modifiers for keyboard modifiers, `prevent`, and `once`:
 
 ```html
-<input type="text" v-keybind.prevent.once="'enter'" v-run="onEnter" />
+<input type="text" v-keybind.control.shift.once.prevent:enter="onEnter" />
 ```
 
-`v-keybind` accepts the same `keys` value as `keyboard.bind`.
+The directive arg is the key. For platform-aware or multi-key bindings, use `useKeybind`.
 
 ```html
-<input
-  type="text"
-  v-keybind="['no-macos:control+$num', 'macos:meta+$num']"
-  v-run="
-    (ctx: HandlerContext) => {
-      console.log(ctx.template);
-    }
-  "
-/>
+<input type="text" v-keybind.meta:k="openCommandPalette" />
 ```
 
-The directive only registers when both `v-keybind` and `v-run` are present on the same element. It automatically limits the handler to that focused element.
+The directive automatically limits the handler to that focused element.
 
 ## Changes
 
@@ -450,7 +441,7 @@ Rewrite started in `552b0f14cd5e71ccdf08d1e74d42da58115f70b9`.
 - Changed keybind data to `KeybindShape` / `CreateKeybindShape`
 - Removed `parseKeyData`
 - Added automatic initialization when `window` is available
-- Kept Nuxt module support with `useKeybind`, `useKeybindLayer`, `useKeyboardInspector`, `useKeybindRecorder`, `v-keybind`, and `v-run`
+- Kept Nuxt module support with `useKeybind`, `useKeybindLayer`, `useKeyboardInspector`, `useKeybindRecorder`, and `v-keybind`
 
 ### v8 -> v9
 

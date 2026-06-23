@@ -1,8 +1,7 @@
 import type { Keyboard } from "@waradu/keyboard";
-import type { Directive } from "vue";
 
 import type { ModuleOptions } from "./index";
-import type { vKeybind, vRun } from "./runtime/directives";
+import type { vKeybind } from "./runtime/directives";
 export * from "./index";
 
 declare module "nuxt/app" {
@@ -20,7 +19,6 @@ declare module "#app" {
 declare module "vue" {
   interface GlobalDirectives {
     vKeybind: typeof vKeybind;
-    vRun: typeof vRun;
   }
 }
 
