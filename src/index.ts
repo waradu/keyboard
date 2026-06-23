@@ -73,11 +73,9 @@ export class Keyboard {
         if (key.modifiers.control !== event.ctrlKey) continue;
         if (key.modifiers.meta !== event.metaKey) continue;
 
-        const hasActiveLayer = handler.config.layers?.some(
-          (layer) => !this.disabledLayers.has(layer),
-        );
+        if (!handler.config.layers || handler.config.layers.length === 0) return true;
 
-        return hasActiveLayer ?? true;
+        return handler.config.layers.some((layer) => !this.disabledLayers.has(layer));
       }
 
       return false;
@@ -273,9 +271,13 @@ export class Keyboard {
       options = [options];
     }
 
+    let layers: string[] = [...(config.layers ?? [])];
+
     for (const option of options) {
-      option.config?.layers?.forEach((layer) => this.allLayers.add(layer));
+      layers = [...layers, ...(option.config?.layers ?? [])];
     }
+
+    layers.forEach((layer) => this.allLayers.add(layer));
 
     const results = options.map((option) => {
       const local = merge<Config>(option.config, config, {
@@ -285,6 +287,8 @@ export class Keyboard {
         once: false,
         when: true,
       });
+
+      local.layers = layers;
 
       if (local.signal?.aborted) return;
 
