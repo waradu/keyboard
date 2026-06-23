@@ -72,7 +72,7 @@ useKeybind([
 
 const editor = useKeybindLayer("editor");
 
-editor.listen({
+editor.bind({
   keys: "y",
   run() {
     console.log("Editor layer");
@@ -88,8 +88,8 @@ useKeybind({
 });
 
 onMounted(() => {
-  window.addEventListener("keydown", (e) => {
+  /* window.addEventListener("keydown", (e) => {
     console.log("KEY:", e.key, "CODE:", e.code);
-  });
+  }); */
 });
 </script>

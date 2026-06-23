@@ -1,13 +1,42 @@
-import type { KeyData } from "./helper";
-import type { KeyString } from "./keys";
+import type { AnyKey, KeyString, KeyValue, ModifierValue, PlatformValue } from "./keys";
+
+export type Os = "macos" | "linux" | "windows" | "unknown";
+
+export interface KeyboardConfig {
+  /**
+   * Print debug messages.
+   * @default false
+   */
+  debug?: boolean;
+
+  /**
+   * Platform of the user. Set this manually to override automatic detection.
+   * If not set, `keyboard.init` will try to detect the platform itself.
+   */
+  platform?: Os;
+
+  signal?: AbortSignal;
+}
+
+export type ModifierMap = Partial<Record<ModifierValue, boolean>>;
+
+export interface KeybindShape {
+  platform?: PlatformValue;
+  modifiers: Record<ModifierValue, boolean>;
+  key: KeyValue | AnyKey;
+}
+
+export interface CreateKeybindShape {
+  platform?: PlatformValue;
+  modifiers?: ModifierMap;
+  key: KeyValue | AnyKey;
+}
 
 export interface HandlerContext {
   template?: number;
-  listener: Listener;
+  handler: Handler;
   event: KeyboardEvent;
 }
-
-export type Handler = (context: HandlerContext) => unknown;
 
 export interface Config {
   /**
@@ -66,42 +95,22 @@ export interface Config {
   signal?: AbortSignal;
 }
 
-export type Os = "macos" | "linux" | "windows" | "unknown";
+export type HandlerFunc = (context: HandlerContext) => unknown;
 
-export interface KeyboardConfig {
-  /**
-   * Print debug messages.
-   * @default false
-   */
-  debug?: boolean;
-
-  /**
-   * Platform of the user. Set this manually to override automatic detection.
-   * If not set, `keyboard.init` will try to detect the platform itself.
-   */
-  platform?: Os;
-
-  signal?: AbortSignal;
-}
-
-export interface LayerOptions {
-  enabled?: boolean;
-}
-
-export interface Listener {
+export interface Handler {
   id: string;
   off: () => unknown;
 
-  keys: KeyString[];
-  handler: Handler;
+  keys: KeybindShape[];
+  handler: HandlerFunc;
   config: Config;
 }
 
-export type Handlers = Listener[];
+export type Handlers = Handler[];
 
 export interface Options {
-  keys: KeyString | KeyData | (KeyString | KeyData)[];
-  run: Handler;
+  keys: KeyString | CreateKeybindShape | (KeyString | CreateKeybindShape)[];
+  run: HandlerFunc;
   config?: Config;
 }
 

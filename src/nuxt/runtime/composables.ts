@@ -1,16 +1,16 @@
-import type { Handlers, KeySequence, LayerOptions, Options, useKeyboard } from "@waradu/keyboard";
+import type { Handlers, KeybindShape, Keyboard } from "@waradu/keyboard";
 import { useNuxtApp } from "nuxt/app";
 import { getCurrentInstance, onBeforeUnmount, ref } from "vue";
 
 interface KeyboardNuxtApp {
-  $keyboard: ReturnType<typeof useKeyboard>;
+  $keyboard: Keyboard;
 }
 
-export function useKeybind(options: Options | Options[]) {
+export const useKeybind = ((...args: Parameters<Keyboard["bind"]>) => {
   const { $keyboard } = useNuxtApp() as unknown as KeyboardNuxtApp;
 
   const vm = getCurrentInstance();
-  const off = $keyboard.listen(options);
+  const off = $keyboard.bind(...args);
 
   if (vm) {
     onBeforeUnmount(() => {
@@ -19,13 +19,13 @@ export function useKeybind(options: Options | Options[]) {
   }
 
   return off;
-}
+}) as Keyboard["bind"];
 
-export function useKeybindLayer(layers: string | string[], options?: LayerOptions) {
+export function useKeybindLayer(...args: Parameters<Keyboard["layers"]["create"]>) {
   const { $keyboard } = useNuxtApp() as unknown as KeyboardNuxtApp;
 
   const vm = getCurrentInstance();
-  const layer = $keyboard.layers.create(layers, options);
+  const layer = $keyboard.layers.create(...args);
 
   if (vm) {
     onBeforeUnmount(() => {
@@ -39,20 +39,20 @@ export function useKeybindLayer(layers: string | string[], options?: LayerOption
 export function useKeyboardInspector() {
   const { $keyboard } = useNuxtApp() as unknown as KeyboardNuxtApp;
 
-  const listeners = ref<Handlers>([]);
+  const allHandlers = ref<Handlers>([]);
 
   const unsubscribe = $keyboard.subscribe((handlers) => {
-    listeners.value = handlers;
+    allHandlers.value = handlers;
   });
 
   onBeforeUnmount(() => {
     unsubscribe?.();
   });
 
-  return { listeners, unsubscribe };
+  return { handlers: allHandlers, unsubscribe };
 }
 
-export function useKeybindRecorder(cb: (sequence: KeySequence) => void) {
+export function useKeybindRecorder(cb: (sequence: KeybindShape) => void) {
   const { $keyboard } = useNuxtApp();
 
   const vm = getCurrentInstance();

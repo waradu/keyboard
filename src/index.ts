@@ -1,99 +1,79 @@
-import { detectOsInBrowser, isEditableElement, parseKeyString, parseKeyData } from "./helper";
-import type { KeyData } from "./helper";
 import {
-  keys,
-  modifiers,
-  SEPARATOR,
-  type KeyKey,
-  type KeySequence,
-  type KeyString,
-  type KeyValue,
-  type ModifierKey,
-  type ModifierValue,
-  type PlatformValue,
-} from "./keys";
+  merge,
+  parseKeyString,
+  parseCreateKeybindShape,
+  anyKeyData,
+  detectOsInBrowser,
+  isEditableElement,
+} from "./helper";
+import { ANYKEY, keys, type KeyKey, type KeySequence, type KeyString, type KeyValue } from "./keys";
 import type {
-  Config,
-  Handlers,
   KeyboardConfig,
+  Config,
   Handler,
-  HandlerContext,
-  Options,
-  Listener,
+  Handlers,
   SubscribeCallback,
-  LayerOptions,
+  Options,
+  KeybindShape,
+  HandlerContext,
 } from "./types";
 
-/**
- * Create a keyboard listener.
- *
- * @param config Optional settings to configure the keyboard.
- */
-export const useKeyboard = (config: KeyboardConfig = {}) => {
-  let listeners: Handlers = [];
-  const disabledLayers = new Set<string>();
-  const allLayers = new Set<string>();
+export class Keyboard {
+  private handlers: Handlers = [];
+  private allLayers = new Set<string>();
+  private disabledLayers = new Set<string>();
+  private subscribers: SubscribeCallback[] = [];
+  private pressed = new Set<KeyValue>();
 
-  const pressedKeys = new Set<KeyValue>();
-  const pressedModifiers = new Set<ModifierValue>();
+  constructor(private config: KeyboardConfig = {}) {}
 
-  const log = (...text: string[]) => {
-    if (config.debug) console.log(`<KEYBOARD>`, ...text);
-  };
+  private log(...data: any[]) {
+    if (this.config.debug) console.log("<KEYBOARD>", ...data);
+  }
 
-  const onKeydown = (event: KeyboardEvent): void => {
+  private onKeydown = (event: KeyboardEvent) => {
     if (event.isComposing) return;
 
-    const k = event.key.toLowerCase();
+    const eventKey = event.key.toLowerCase();
+    const key = keys[eventKey as KeyKey];
 
-    log(`pressed '${k}'`);
-
-    if (modifiers[k as ModifierKey]) {
-      pressedModifiers.add(modifiers[k as ModifierKey]);
-      return;
-    } else if (keys[k as KeyKey]) {
-      pressedKeys.add(keys[k as KeyKey]);
+    if (key) {
+      this.pressed.add(key);
+      this.log(`pressed '${key}'`);
     }
 
-    const candidates = listeners.filter((l) => {
-      for (let key of l.keys) {
-        if (key == "any") return true;
+    const candidates = this.handlers.filter((handler) => {
+      for (const key of handler.keys) {
+        if (key.key === ANYKEY) return true;
 
-        let platform: PlatformValue | undefined;
+        if (key.platform) {
+          const browserPlatform = this.config.platform ?? detectOsInBrowser();
 
-        if (key.includes(":")) {
-          [platform, key] = key.split(":") as [PlatformValue, KeySequence];
+          if (key.platform === "linux" && browserPlatform !== "linux") continue;
+          if (key.platform === "win" && browserPlatform !== "windows") continue;
+          if (key.platform === "macos" && browserPlatform !== "macos") continue;
+          if (key.platform === "no-linux" && browserPlatform === "linux") continue;
+          if (key.platform === "no-win" && browserPlatform === "windows") continue;
+          if (key.platform === "no-macos" && browserPlatform === "macos") continue;
         }
 
-        if (platform) {
-          const browserPlatform = config.platform ?? detectOsInBrowser();
+        const pressedArray = Array.from(this.pressed);
+        const firstKey = pressedArray[pressedArray.length - 1];
 
-          if (platform === "linux" && browserPlatform !== "linux") continue;
-          if (platform === "win" && browserPlatform !== "windows") continue;
-          if (platform === "macos" && browserPlatform !== "macos") continue;
-          if (platform === "no-linux" && browserPlatform === "linux") continue;
-          if (platform === "no-win" && browserPlatform === "windows") continue;
-          if (platform === "no-macos" && browserPlatform === "macos") continue;
-        }
-
-        let [k, ...mods] = key.split(SEPARATOR).reverse() as [KeyValue, ...ModifierValue[]];
-
-        const pressedKeysArray = Array.from(pressedKeys);
-        const firstKey = pressedKeysArray[pressedKeysArray.length - 1];
-        if (k === "$num" && Number.isNaN(parseInt(firstKey!))) {
+        if (key.key === "$num" && Number.isNaN(parseInt(firstKey!))) {
           continue;
-        } else if (k !== "$num" && !Array.from(pressedKeys).includes(k)) {
+        } else if (key.key !== "$num" && !Array.from(this.pressed).includes(key.key)) {
           continue;
         }
 
-        if (
-          pressedModifiers.size !== mods.length ||
-          !Array.from(pressedModifiers).every((modifier) => mods.includes(modifier))
-        ) {
-          continue;
-        }
+        if (key.modifiers.shift !== event.shiftKey) continue;
+        if (key.modifiers.alt !== event.altKey) continue;
+        if (key.modifiers.control !== event.ctrlKey) continue;
+        if (key.modifiers.meta !== event.metaKey) continue;
 
-        const hasActiveLayer = l.config.layers?.some((layer) => !disabledLayers.has(layer));
+        const hasActiveLayer = handler.config.layers?.some(
+          (layer) => !this.disabledLayers.has(layer),
+        );
 
         return hasActiveLayer ?? true;
       }
@@ -103,46 +83,46 @@ export const useKeyboard = (config: KeyboardConfig = {}) => {
 
     if (candidates.length === 0) return;
 
-    candidates.forEach(async (listener) => {
+    candidates.forEach(async (handler) => {
       const activeElement = document.activeElement;
 
       if (
-        listener.config?.ignoreIfEditable &&
+        handler.config?.ignoreIfEditable &&
         activeElement &&
         activeElement instanceof Element &&
         isEditableElement(activeElement)
       )
         return;
 
-      if (listener.config?.runIfFocused) {
-        const run = listener.config?.runIfFocused;
+      if (handler.config?.runIfFocused) {
+        const run = handler.config?.runIfFocused;
 
         if (Array.isArray(run)) {
           if (
             !run.some((element) => {
-              return element && document.activeElement && element == document.activeElement;
+              return element && document.activeElement && element === document.activeElement;
             })
           )
             return;
         }
       }
 
-      if (listener.config?.prevent) event.preventDefault();
-      if (listener.config?.stop === true) event.stopPropagation();
-      if (listener.config?.stop === "immediate") event.stopImmediatePropagation();
-      if (listener.config?.stop === "both") {
+      if (handler.config?.prevent) event.preventDefault();
+      if (handler.config?.stop === true) event.stopPropagation();
+      if (handler.config?.stop === "immediate") event.stopImmediatePropagation();
+      if (handler.config?.stop === "both") {
         event.stopPropagation();
         event.stopImmediatePropagation();
       }
 
-      const pressedKeysArray = Array.from(pressedKeys);
+      const pressedKeysArray = Array.from(this.pressed);
       const pressedNumber = parseInt(pressedKeysArray[pressedKeysArray.length - 1]!);
 
-      if (!listener.config.when) {
+      if (!handler.config.when) {
         return;
-      } else if (typeof listener.config.when === "function") {
+      } else if (typeof handler.config.when === "function") {
         try {
-          const when = await listener.config.when();
+          const when = await handler.config.when();
           if (!when) return;
         } catch (e) {
           console.error(e);
@@ -150,197 +130,284 @@ export const useKeyboard = (config: KeyboardConfig = {}) => {
         }
       }
 
-      listener.handler({
+      handler.handler({
         template: Number.isNaN(pressedNumber) ? undefined : pressedNumber,
-        listener: listener,
-        event: event,
+        handler,
+        event,
       });
 
-      log(`handled '${listener.id}'`);
+      this.log(`handled '${handler.id}'`);
 
-      if (listener.config?.once) unlisten(listener.id);
+      if (handler.config?.once) this.unbind(handler.id);
     });
   };
 
-  const onKeyup = (event: KeyboardEvent): void => {
+  private onKeyup = (event: KeyboardEvent) => {
     if (event.isComposing) return;
 
-    const k = event.key.toLowerCase();
+    const eventKey = event.key.toLowerCase();
+    const key = keys[eventKey as KeyKey];
+    this.pressed.delete(event.key as KeyValue);
 
-    if (modifiers[k as ModifierKey]) {
-      pressedModifiers.delete(modifiers[k as ModifierKey]);
-    } else if (keys[k as KeyKey]) {
-      pressedKeys.delete(keys[k as KeyKey]);
+    if (key) {
+      this.pressed.delete(key);
+      this.log(`released '${key}'`);
     }
-
-    log(`released '${k}'`);
   };
 
-  const onBlur = () => {
-    pressedKeys.clear();
-    pressedModifiers.clear();
-    log("cleared due to blur");
+  private onBlur = () => {
+    this.pressed.clear();
+    this.log("cleared due to blur");
   };
 
-  const clear = (): void => {
-    for (const l of listeners) l.off?.();
-    listeners = [];
-    pressedKeys.clear();
-    pressedModifiers.clear();
-    log(`cleared`);
-
-    notify();
-  };
-
-  const stop = (): void => {
-    if (typeof window !== "undefined" && typeof window.removeEventListener === "function") {
-      window.removeEventListener("keydown", onKeydown);
-      window.removeEventListener("keyup", onKeyup);
-      window.removeEventListener("blur", onBlur);
+  /**
+   * Clear all listeners.
+   */
+  clear() {
+    while (this.handlers.length > 0) {
+      const handler = this.handlers[0];
+      if (!handler) break;
+      handler.off();
     }
+    this.handlers.length = 0;
+    this.pressed.clear();
+    this.log(`cleared`);
 
-    log("stopped");
-  };
+    this.notify();
+  }
 
-  const destroy = (): void => {
-    stop();
-    clear();
-  };
+  /**
+   * Removes all event handlers.
+   * To re-enable listening after calling this, call `init()` again.
+   */
+  stop() {
+    if (typeof window !== "undefined") {
+      window.removeEventListener("keydown", this.onKeydown);
+      window.removeEventListener("keyup", this.onKeyup);
+      window.removeEventListener("blur", this.onBlur);
 
-  const init = async (opts?: { signal?: AbortSignal }) => {
-    stop();
-    if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
-      window.addEventListener("keydown", onKeydown);
-      window.addEventListener("keyup", onKeyup);
-      window.addEventListener("blur", onBlur);
+      this.log("stopped");
+    }
+  }
 
-      const abortSignal = opts?.signal ?? config.signal;
+  /**
+   * Removes all event handlers and clears any stored key state.
+   * Use this if you are not planning to re-enable listening with `init()` after.
+   */
+  destroy() {
+    this.stop();
+    this.clear();
+  }
+
+  /**
+   * Initialize the keyboard. Call this when `window` is available (it will fail silently).
+   * You can define listeners bevore initializing.
+   */
+  async init(opts?: { signal?: AbortSignal }) {
+    this.stop();
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("keydown", this.onKeydown);
+      window.addEventListener("keyup", this.onKeyup);
+      window.addEventListener("blur", this.onBlur);
+
+      const abortSignal = opts?.signal ?? this.config.signal;
       if (abortSignal) {
-        if (abortSignal.aborted) destroy();
-        else abortSignal.addEventListener("abort", destroy, { once: true });
+        if (abortSignal.aborted) this.destroy();
+        else abortSignal.addEventListener("abort", () => this.destroy(), { once: true });
       }
 
-      log("initialized");
+      this.log("initialized");
     } else {
-      log("ERROR: window was not found");
+      this.log("ERROR: window was not found to initialize");
     }
-  };
+  }
 
-  const unlisten = (id: string) => {
-    const index = listeners.findIndex((l) => l.id === id);
-    if (index !== -1 && listeners[index]) {
-      listeners[index].off();
-      listeners.splice(index, 1);
-      log(`removed: '${id}'`);
-    }
-
-    notify();
-  };
-
-  const listen = (options: Options | Options[]) => {
+  /**
+   * Create new handler.
+   *
+   * @param handler Handler options.
+   * @returns Unlisten function
+   *
+   * @example
+   * ```ts
+   * keyboard.bind({
+   *   keys: "alt+a",
+   *   run() {
+   *     console.log("Alt + A key pressed");
+   *   }
+   * });
+   * ```
+   */
+  bind(handler: Options): () => void;
+  /**
+   * Create new handlers.
+   *
+   * @param options Multiple handlers with options.
+   * @param config The config that gets applied to all handler.
+   * @returns Unlisten function
+   *
+   * @example
+   * ```ts
+   * keyboard.bind([
+   *   {
+   *     keys: "alt+a",
+   *     run() {
+   *       console.log("Alt + A key pressed");
+   *     }
+   *   },
+   *   {
+   *     keys: "alt+b",
+   *     run() {
+   *       console.log("Alt + B key pressed");
+   *     }
+   *   },
+   * ]);
+   * ```
+   */
+  bind(handlers: Options[], config?: Config): () => void;
+  bind(options: Options | Options[], config: Config = {}): () => void {
     if (!Array.isArray(options)) {
       options = [options];
     }
 
-    options.forEach((option) => {
-      if (option.config?.layers) {
-        for (const layer of option.config.layers) {
-          allLayers.add(layer);
-        }
+    for (const option of options) {
+      option.config?.layers?.forEach((layer) => this.allLayers.add(layer));
+    }
+
+    const results = options.map((option) => {
+      const local = merge<Config>(option.config, config, {
+        prevent: false,
+        stop: false,
+        ignoreIfEditable: false,
+        once: false,
+        when: true,
+      });
+
+      if (local.signal?.aborted) return;
+
+      if (!Array.isArray(option.keys)) {
+        option.keys = [option.keys];
       }
+
+      let keys = option.keys
+        .map((key) =>
+          typeof key === "string" ? parseKeyString(key) : parseCreateKeybindShape(key),
+        )
+        .filter((k) => !!k);
+
+      if (keys.find((k) => k.key === ANYKEY)) {
+        keys = [anyKeyData()];
+      }
+
+      const id = Math.random().toString(36).slice(2, 7);
+
+      const off = () => {
+        const index = this.handlers.findIndex((handler) => handler.id === id);
+        if (index === -1) return;
+
+        this.handlers.splice(index, 1);
+        local.signal?.removeEventListener("abort", off);
+        this.log(`removed: '${id}'`);
+        this.notify();
+      };
+      if (local?.signal) local.signal.addEventListener("abort", off, { once: true });
+
+      const handler: Handler = {
+        id,
+        off,
+        keys: keys,
+        handler: option.run,
+        config: local,
+      };
+
+      this.handlers.push(handler);
+
+      this.log(`added '${option.keys.join(", ")}' with id: '${id}'`);
+
+      return { id, off };
     });
 
-    const results = options
-      .map((option) => {
-        const cleanConfig = Object.fromEntries(
-          Object.entries(option.config ?? {}).filter(([, v]) => v !== undefined),
-        );
-
-        const config: Config = {
-          prevent: false,
-          stop: false,
-          ignoreIfEditable: false,
-          once: false,
-          when: true,
-          ...cleanConfig,
-        };
-
-        if (!Array.isArray(option.keys)) {
-          option.keys = [option.keys];
-        }
-
-        let keys = option.keys.map((key) => (typeof key === "string" ? key : parseKeyData(key)));
-
-        if (keys.includes("any")) {
-          keys = ["any"];
-        }
-
-        if (config?.signal?.aborted) return;
-
-        const id = Math.random().toString(36).slice(2, 7);
-
-        const onAbort = () => unlisten(id);
-        if (config?.signal) config.signal.addEventListener("abort", onAbort, { once: true });
-
-        const listener: Listener = {
-          id,
-          off: () => config.signal?.removeEventListener("abort", onAbort),
-
-          keys: keys,
-          handler: option.run,
-          config: config,
-        };
-
-        listeners.push(listener);
-
-        notify();
-
-        log(`added '${option.keys.join(", ")}' with id: '${id}'`);
-
-        return { id, onAbort };
-      })
-      .filter((result) => !!result);
+    this.notify();
 
     return () => {
-      results.forEach((result) => {
-        if (config.signal) config.signal.removeEventListener("abort", result.onAbort);
-        unlisten(result.id);
-      });
+      results.forEach((result) => result?.off());
     };
-  };
+  }
 
-  let subscribers: SubscribeCallback[] = [];
+  unbind(id: string) {
+    this.handlers.find((handler) => handler.id === id)?.off();
+  }
 
-  const notify = () => {
-    subscribers.forEach((cb) => cb([...listeners]));
-  };
+  private notify() {
+    this.subscribers.forEach((cb) => cb([...this.handlers]));
+  }
 
-  const subscribe = (cb: SubscribeCallback) => {
-    subscribers.push(cb);
-    cb([...listeners]);
+  /**
+   * Subscribe to changes of all registered keyboard listeners.
+   *
+   * The callback is called:
+   * - once immediately with the current listeners
+   * - on every add/remove/clear of listeners
+   *
+   * @param callback Receives the current list of listeners on each change.
+   * @returns Function to unsubscribe from further updates.
+   */
+  subscribe(cb: SubscribeCallback) {
+    this.subscribers.push(cb);
+    cb([...this.handlers]);
     return () => {
-      subscribers = subscribers.filter((fn) => fn !== cb);
+      this.subscribers = this.subscribers.filter((fn) => fn !== cb);
     };
-  };
+  }
 
-  const record = (cb: (sequence: KeySequence) => void) => {
-    const handler = (event: KeyboardEvent) => {
+  /**
+   * Check if Key String listener already exists.
+   */
+  exists(sequence: KeyString) {
+    const shape = parseKeyString(sequence);
+    if (!shape) return false;
+
+    return this.handlers.some((handler) => {
+      for (const key of handler.keys) {
+        if (key.key !== shape.key) continue;
+        if (key.platform !== shape.platform) continue;
+        if (key.modifiers.shift !== shape.modifiers.shift) continue;
+        if (key.modifiers.alt !== shape.modifiers.alt) continue;
+        if (key.modifiers.control !== shape.modifiers.control) continue;
+        if (key.modifiers.meta !== shape.modifiers.meta) continue;
+
+        return true;
+      }
+
+      return false;
+    });
+  }
+
+  /**
+   * Record pressed keys and emit them as a KeybindShape.
+   *
+   * @param callback Receives each recorded keybind shape.
+   * @returns Function to stop recording.
+   */
+  record(cb: (sequence: KeybindShape) => void) {
+    const handler = (event: KeyboardEvent): KeybindShape | undefined => {
       if (event.isComposing) return;
 
-      const key = keys[event.key.toLowerCase() as KeyKey];
-      if (!key || modifiers[event.key.toLowerCase() as ModifierKey]) return;
+      const eventKey = event.key.toLowerCase();
+      const key = keys[eventKey as KeyKey];
 
-      const sequenceParts: ModifierValue[] = [];
-      if (event.metaKey) sequenceParts.push(modifiers.meta);
-      if (event.ctrlKey) sequenceParts.push(modifiers.control);
-      if (event.altKey) sequenceParts.push(modifiers.alt);
-      if (event.shiftKey) sequenceParts.push(modifiers.shift);
+      if (!key) return;
 
-      const sequence = sequenceParts.length
-        ? (`${sequenceParts.join(SEPARATOR)}${SEPARATOR}${key}` as KeySequence)
-        : (key as KeySequence);
-
-      cb(sequence);
+      cb({
+        key,
+        modifiers: {
+          shift: event.shiftKey,
+          alt: event.altKey,
+          control: event.ctrlKey,
+          meta: event.metaKey,
+        },
+      });
     };
 
     if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
@@ -348,92 +415,52 @@ export const useKeyboard = (config: KeyboardConfig = {}) => {
       return () => window.removeEventListener("keydown", handler);
     }
 
-    log("ERROR: window was not found");
+    this.log("ERROR: window was not found for recording");
     return () => {};
-  };
+  }
 
-  const layers = {
+  layers = {
     /**
      * Create new keybind layer.
      */
-    create: (layers: string | string[], layerOptions?: LayerOptions) => {
+    create: (layer: string, disabled?: boolean) => {
       const offs: (() => void)[] = [];
 
-      if (!Array.isArray(layers)) {
-        layers = [layers];
-      }
-
-      layerOptions = {
-        enabled: true,
-        ...layerOptions,
-      };
+      this.allLayers.add(layer);
+      if (disabled) this.disabledLayers.add(layer);
 
       return {
         /**
          * Disable these layers
          */
         disable: () => {
-          for (const layer of layers) {
-            disabledLayers.add(layer);
-          }
+          this.disabledLayers.add(layer);
         },
         /**
          * Enable these layers
          */
         enable: () => {
-          for (const layer of layers) {
-            disabledLayers.delete(layer);
-          }
+          this.disabledLayers.delete(layer);
         },
         /**
          * Enable these layers
          */
         toggle: () => {
-          for (const layer of layers) {
-            if (disabledLayers.has(layer)) {
-              disabledLayers.delete(layer);
-            } else {
-              disabledLayers.add(layer);
-            }
+          if (this.disabledLayers.has(layer)) {
+            this.disabledLayers.delete(layer);
+          } else {
+            this.disabledLayers.add(layer);
           }
         },
-        /**
-         * Create new listener.
-         *
-         * @param keys Key sequence to listen to.
-         * @param handler Handler function.
-         * @param config Optional settings to configure the listener.
-         * @returns Unlisten function
-         *
-         * @example
-         * ```ts
-         * const unlisten = keyboard.listen([Key.Alt, Key.A], () => {
-         *   message.value = "Alt + A key pressed";
-         * });
-         *
-         * unlisten();
-         * ```
-         */
-        listen: (options: Options | Options[]) => {
-          if (!Array.isArray(options)) {
-            options = [options];
-          }
+        bind: ((...args: Parameters<typeof this.bind>) => {
+          const config = { ...args[1] };
+          if (!config.layers) config.layers = [];
+          config.layers.push(layer);
 
-          options.forEach((option) => {
-            if (!option.config) option.config = {};
-            option.config.layers = [...(option.config.layers ?? []), ...layers];
-          });
-
-          if (!layerOptions.enabled) {
-            for (const layer of layers) {
-              disabledLayers.add(layer);
-            }
-          }
-
-          const off = listen(options);
-          offs.push(off);
-          return off;
-        },
+          const binding = this.bind(args[0], config);
+          offs.push(binding);
+          return binding;
+        }) as typeof this.bind,
         /**
          * Disables all listeners in layer.
          */
@@ -453,7 +480,7 @@ export const useKeyboard = (config: KeyboardConfig = {}) => {
       }
 
       for (const layer of layers) {
-        disabledLayers.delete(layer);
+        this.disabledLayers.delete(layer);
       }
     },
     /**
@@ -465,7 +492,7 @@ export const useKeyboard = (config: KeyboardConfig = {}) => {
       }
 
       for (const layer of layers) {
-        disabledLayers.add(layer);
+        this.disabledLayers.add(layer);
       }
     },
     /**
@@ -476,99 +503,29 @@ export const useKeyboard = (config: KeyboardConfig = {}) => {
         layers = [layers];
       }
 
-      disabledLayers.clear();
+      this.disabledLayers.clear();
 
-      for (const layer of allLayers) {
+      for (const layer of this.allLayers) {
         if (layers.includes(layer)) continue;
-        disabledLayers.add(layer);
+        this.disabledLayers.add(layer);
       }
     },
     /**
      * Enable all layers.
      */
     all: () => {
-      disabledLayers.clear();
+      this.disabledLayers.clear();
     },
     /**
      * Disable all layers.
      */
     none: () => {
-      for (const layer of allLayers) {
-        disabledLayers.add(layer);
+      for (const layer of this.allLayers) {
+        this.disabledLayers.add(layer);
       }
     },
   };
-
-  const exists = (sequence: KeyString) => {
-    return listeners.some((listener) => listener.keys.includes(sequence));
-  };
-
-  return {
-    /**
-     * Initialize the keyboard. Call this when `window` is available (it will fail silently).
-     * You can define listeners bevore initializing.
-     */
-    init,
-    /**
-     * Removes all event handlers.
-     * To re-enable listening after calling this, call `init()` again.
-     */
-    stop,
-    /**
-     * Removes all event handlers and clears any stored key state.
-     * Use this if you are not planning to re-enable listening with `init()` after.
-     */
-    destroy,
-    /**
-     * Clear all listeners.
-     */
-    clear,
-    /**
-     * Create new listener.
-     *
-     * @param keys Key sequence to listen to.
-     * @param handler Handler function.
-     * @param config Optional settings to configure the listener.
-     * @returns Unlisten function
-     *
-     * @example
-     * ```ts
-     * const unlisten = keyboard.listen([Key.Alt, Key.A], () => {
-     *   message.value = "Alt + A key pressed";
-     * });
-     *
-     * unlisten();
-     * ```
-     */
-    listen,
-    /**
-     * Subscribe to changes of all registered keyboard listeners.
-     *
-     * The callback is called:
-     * - once immediately with the current listeners
-     * - on every add/remove/clear of listeners
-     *
-     * @param callback Receives the current list of listeners on each change.
-     * @returns Function to unsubscribe from further updates.
-     */
-    subscribe,
-    /**
-     * Record pressed keys and emit them as a KeySequence.
-     *
-     * @param callback Receives each recorded sequence.
-     * @returns Function to stop recording.
-     */
-    record,
-    /**
-     * Create and manage Layers.
-     */
-    layers,
-    /**
-     * Check if Key String listener already exists.
-     */
-    exists,
-  };
-};
+}
 
 export type {
   Config,
@@ -577,9 +534,7 @@ export type {
   Handler,
   Handlers,
   HandlerContext,
-  Listener,
   KeySequence,
-  KeyData,
-  LayerOptions,
+  KeybindShape,
 };
-export { parseKeyString, parseKeyData };
+export { parseKeyString };

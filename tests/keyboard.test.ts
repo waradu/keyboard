@@ -1,14 +1,14 @@
 import { test, expect, mock, type Mock } from "bun:test";
 
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
-import { parseKeyData, parseKeyString, useKeyboard } from "@waradu/keyboard";
+import { parseKeyString, Keyboard } from "@waradu/keyboard";
 
 import type { HandlerContext, Os } from "../src/types";
 
 GlobalRegistrator.register();
 
 const prepare = (platform?: Os) => {
-  const keyboard = useKeyboard({
+  const keyboard = new Keyboard({
     platform: platform,
   });
   keyboard.init();
@@ -19,25 +19,25 @@ const prepare = (platform?: Os) => {
   return { keyboard, spy };
 };
 
-const down = (key: string) => {
-  const event = new KeyboardEvent("keydown", { key: key });
+const press = (key: string, options?: KeyboardEventInit) => {
+  const event = new KeyboardEvent("keydown", { key, ...options });
   window.dispatchEvent(event);
 };
 
-const up = (key: string) => {
-  const event = new KeyboardEvent("keyup", { key: key });
+const release = (key: string, options?: KeyboardEventInit) => {
+  const event = new KeyboardEvent("keyup", { key, ...options });
   window.dispatchEvent(event);
 };
 
 test("keyboard handler fires on 'a' press", () => {
   const { keyboard, spy } = prepare();
 
-  keyboard.listen({
+  keyboard.bind({
     keys: ["a"],
     run: spy,
   });
 
-  down("a");
+  press("a");
 
   expect(spy).toHaveBeenCalledTimes(1);
 
@@ -47,15 +47,15 @@ test("keyboard handler fires on 'a' press", () => {
 test("any keyboard handler fires on any press", () => {
   const { keyboard, spy } = prepare();
 
-  keyboard.listen({
-    keys: ["any"],
+  keyboard.bind({
+    keys: ["$any"],
     run: spy,
   });
 
-  down("x");
-  down("o");
-  down("3");
-  down(" ");
+  press("x");
+  press("o");
+  press("3");
+  press(" ");
 
   expect(spy).toHaveBeenCalledTimes(4);
 
@@ -65,17 +65,17 @@ test("any keyboard handler fires on any press", () => {
 test("one-time keyboard handler only fires once", () => {
   const { keyboard, spy } = prepare();
 
-  keyboard.listen({
+  keyboard.bind({
     keys: ["a"],
     run: spy,
     config: { once: true },
   });
 
-  down("a");
+  press("a");
 
   expect(spy).toHaveBeenCalledTimes(1);
 
-  down("a");
+  press("a");
 
   expect(spy).toHaveBeenCalledTimes(1);
 
@@ -85,7 +85,7 @@ test("one-time keyboard handler only fires once", () => {
 test("keyboard handler ignores editable if set", () => {
   const { keyboard, spy } = prepare();
 
-  keyboard.listen({
+  keyboard.bind({
     keys: ["a"],
     run: spy,
     config: { ignoreIfEditable: true },
@@ -95,13 +95,13 @@ test("keyboard handler ignores editable if set", () => {
   document.body.appendChild(ele);
   ele.focus();
 
-  down("a");
+  press("a");
 
   expect(spy).toHaveBeenCalledTimes(0);
 
   ele.blur();
 
-  down("a");
+  press("a");
 
   expect(spy).toHaveBeenCalledTimes(1);
 
@@ -115,7 +115,7 @@ test("keyboard handler runs only if runIfFocused element is focused", () => {
   const ele = document.createElement("input");
   document.body.appendChild(ele);
 
-  keyboard.listen({
+  keyboard.bind({
     keys: ["a"],
     run: spy,
     config: { runIfFocused: [ele] },
@@ -123,13 +123,13 @@ test("keyboard handler runs only if runIfFocused element is focused", () => {
 
   ele.focus();
 
-  down("a");
+  press("a");
 
   expect(spy).toHaveBeenCalledTimes(1);
 
   ele.blur();
 
-  down("a");
+  press("a");
 
   expect(spy).toHaveBeenCalledTimes(1);
 
@@ -142,19 +142,19 @@ test("keyboard handler stops when signal is aborted", () => {
 
   const ac = new AbortController();
 
-  keyboard.listen({
+  keyboard.bind({
     keys: ["a"],
     run: spy,
     config: { signal: ac.signal },
   });
 
-  down("a");
+  press("a");
 
   expect(spy).toHaveBeenCalledTimes(1);
 
   ac.abort();
 
-  down("a");
+  press("a");
 
   expect(spy).toHaveBeenCalledTimes(1);
 
@@ -164,32 +164,34 @@ test("keyboard handler stops when signal is aborted", () => {
 test("keyboard handler only fires if all keys have been pressed", () => {
   const { keyboard, spy } = prepare();
 
-  keyboard.listen({
+  keyboard.bind({
     keys: ["control+y"],
     run: spy,
   });
 
-  down("Control");
+  press("Control", { ctrlKey: true });
 
   expect(spy).toHaveBeenCalledTimes(0);
 
-  down("y");
+  press("y", { ctrlKey: true });
 
   expect(spy).toHaveBeenCalledTimes(1);
+
+  keyboard.destroy();
 });
 
 test("keyboard handler only fires if all keys are being pressed together", () => {
   const { keyboard, spy } = prepare();
 
-  keyboard.listen({
+  keyboard.bind({
     keys: ["control+y"],
     run: spy,
   });
 
-  down("Control");
-  up("Control");
+  press("Control", { ctrlKey: true });
+  release("Control", { ctrlKey: true });
 
-  down("y");
+  press("y");
 
   expect(spy).toHaveBeenCalledTimes(0);
 
@@ -199,16 +201,16 @@ test("keyboard handler only fires if all keys are being pressed together", () =>
 test("keyboard handler can handle complex keybinds", () => {
   const { keyboard, spy } = prepare();
 
-  keyboard.listen({
+  keyboard.bind({
     keys: ["meta+control+alt+shift+arrow-up"],
     run: spy,
   });
 
-  down("Meta");
-  down("Control");
-  down("Alt");
-  down("Shift");
-  down("ArrowUp");
+  press("Meta", { metaKey: true });
+  press("Control", { metaKey: true, ctrlKey: true });
+  press("Alt", { metaKey: true, ctrlKey: true, altKey: true });
+  press("Shift", { metaKey: true, ctrlKey: true, altKey: true, shiftKey: true });
+  press("ArrowUp", { metaKey: true, ctrlKey: true, altKey: true, shiftKey: true });
 
   expect(spy).toHaveBeenCalledTimes(1);
 
@@ -218,19 +220,19 @@ test("keyboard handler can handle complex keybinds", () => {
 test("keyboard handler only fires on macos", () => {
   const { keyboard, spy } = prepare("macos");
 
-  keyboard.listen({
+  keyboard.bind({
     keys: ["macos:a"],
     run: spy,
   });
 
   const { keyboard: keyboard2 } = prepare("linux");
 
-  keyboard2.listen({
+  keyboard2.bind({
     keys: ["macos:a"],
     run: spy,
   });
 
-  down("a");
+  press("a");
 
   expect(spy).toHaveBeenCalledTimes(1);
 
@@ -241,19 +243,19 @@ test("keyboard handler only fires on macos", () => {
 test("keyboard handler does not fire on macos", () => {
   const { keyboard, spy } = prepare("macos");
 
-  keyboard.listen({
+  keyboard.bind({
     keys: ["no-macos:a"],
     run: spy,
   });
 
   const { keyboard: keyboard2 } = prepare("windows");
 
-  keyboard2.listen({
+  keyboard2.bind({
     keys: ["no-macos:a"],
     run: spy,
   });
 
-  down("a");
+  press("a");
 
   expect(spy).toHaveBeenCalledTimes(1);
 
@@ -264,13 +266,13 @@ test("keyboard handler does not fire on macos", () => {
 test("keyboard handler returns dynamic number press", () => {
   const { keyboard, spy } = prepare();
 
-  keyboard.listen({
+  keyboard.bind({
     keys: ["alt+$num"],
     run: spy,
   });
 
-  down("Alt");
-  down("1");
+  press("Alt", { altKey: true });
+  press("1", { altKey: true });
 
   expect(spy).toHaveBeenCalledTimes(1);
 
@@ -322,8 +324,8 @@ test("parse key string into key data", () => {
     },
   });
 
-  expect(parseKeyString("any")).toEqual({
-    key: "any",
+  expect(parseKeyString("$any")).toEqual({
+    key: "$any",
     modifiers: {
       alt: false,
       control: false,
@@ -332,55 +334,8 @@ test("parse key string into key data", () => {
     },
   });
 
-  //@ts-expect-error out of order
-  expect(parseKeyString("meta+alt+control+k")).toBeUndefined();
   //@ts-expect-error mac does not exist
   expect(parseKeyString("mac:k")).toBeUndefined();
   //@ts-expect-error notreal is not a real key (duh)
   expect(parseKeyString("meta+notreal")).toBeUndefined();
-});
-
-test("parse key data into key string", () => {
-  expect(
-    parseKeyData({
-      key: "x",
-      modifiers: {},
-    }),
-  ).toEqual("x");
-
-  expect(
-    parseKeyData({
-      key: "arrow-up",
-      modifiers: {
-        alt: true,
-        control: true,
-        meta: true,
-        shift: true,
-      },
-    }),
-  ).toEqual("meta+control+alt+shift+arrow-up");
-
-  expect(
-    parseKeyData({
-      platform: "macos",
-      key: "x",
-      modifiers: {},
-    }),
-  ).toEqual("macos:x");
-
-  expect(
-    parseKeyData({
-      key: "$num",
-      modifiers: {
-        alt: true,
-      },
-    }),
-  ).toEqual("alt+$num");
-
-  expect(
-    parseKeyData({
-      key: "any",
-      modifiers: {},
-    }),
-  ).toEqual("any");
 });

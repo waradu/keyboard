@@ -1,21 +1,19 @@
-import type { useKeyboard } from "@waradu/keyboard";
+import type { Keyboard } from "@waradu/keyboard";
 import type { Directive } from "vue";
 
 import type { ModuleOptions } from "./index";
 import type { vKeybind, vRun } from "./runtime/directives";
 export * from "./index";
 
-type KeyboardInstance = ReturnType<typeof useKeyboard>;
-
 declare module "nuxt/app" {
   interface NuxtApp {
-    $keyboard: KeyboardInstance;
+    $keyboard: Keyboard;
   }
 }
 
 declare module "#app" {
   interface NuxtApp {
-    $keyboard: KeyboardInstance;
+    $keyboard: Keyboard;
   }
 }
 

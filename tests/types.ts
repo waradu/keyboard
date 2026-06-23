@@ -19,7 +19,7 @@ import type { KeyString } from "../src/keys";
   "alt+$num",
 
   // Catch all
-  "any",
+  "$any",
 
   // @ts-expect-error empty string
   "",

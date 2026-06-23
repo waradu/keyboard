@@ -1,4 +1,6 @@
 export const SEPARATOR = "+" as const;
+export const ANYKEY = "$any" as const;
+export type AnyKey = typeof ANYKEY;
 
 export const keys = {
   // Control / system (without modifiers)
@@ -74,6 +76,18 @@ export const keys = {
   f10: "f10",
   f11: "f11",
   f12: "f12",
+  f13: "f13",
+  f14: "f14",
+  f15: "f15",
+  f16: "f16",
+  f17: "f17",
+  f18: "f18",
+  f19: "f19",
+  f20: "f20",
+  f21: "f21",
+  f22: "f22",
+  f23: "f23",
+  f24: "f24",
 
   // Lock keys
   numlock: "num-lock",
@@ -153,15 +167,15 @@ type FixedCombinations<T extends readonly string[], Acc extends string[] = []> =
 
 type PrefixTuples = Exclude<FixedCombinations<["meta", "control", "alt", "shift"]>, []>;
 
-type Join<T extends readonly string[], Sep extends string> = T extends []
+type Join<T extends readonly string[]> = T extends []
   ? ""
   : T extends [infer F extends string]
     ? F
     : T extends [infer F extends string, ...infer R extends readonly string[]]
-      ? `${F}${Sep}${Join<R, Sep>}`
+      ? `${F}${typeof SEPARATOR}${Join<R>}`
       : string;
 
-type WithModifier = `${Join<PrefixTuples, typeof SEPARATOR>}${typeof SEPARATOR}${KeyValue}`;
+type WithModifier = `${Join<PrefixTuples>}${typeof SEPARATOR}${KeyValue}`;
 export type KeySequence = KeyValue | WithModifier;
 
-export type KeyString = KeySequence | `${PlatformValue}:${KeySequence}` | "any";
+export type KeyString = KeySequence | `${PlatformValue}:${KeySequence}` | AnyKey;
