@@ -1,11 +1,14 @@
 {
   "name": "@waradu/keyboard",
-  "version": "8.0.0",
-  "description": "Keyboard manager",
+  "version": "9.0.0",
+  "description": "A keyboard manager compatible with typescript and nuxt",
   "keywords": [
     "events",
+    "hotkeys",
     "keybinds",
-    "keyboard"
+    "keyboard",
+    "nuxt",
+    "shortcuts"
   ],
   "homepage": "https://waradu.dev",
   "license": "MIT",
