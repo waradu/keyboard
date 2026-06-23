@@ -1,8 +1,21 @@
-import { detectOsInBrowser, isEditableElement } from "../src/helper";
-import { keys, type KeyKey, type KeyString, type KeyValue } from "../src/keys";
-import type { Config, KeyboardConfig } from "../src/types";
-import { merge, parseKeyString, parseCreateKeybindShape, anyKeyData } from "./helper";
-import type { Handler, Handlers, SubscribeCallback, Options, KeybindShape } from "./types";
+import {
+  merge,
+  parseKeyString,
+  parseCreateKeybindShape,
+  anyKeyData,
+  detectOsInBrowser,
+  isEditableElement,
+} from "./helper";
+import { ANYKEY, keys, type KeyKey, type KeyString, type KeyValue } from "./keys";
+import type {
+  KeyboardConfig,
+  Config,
+  Handler,
+  Handlers,
+  SubscribeCallback,
+  Options,
+  KeybindShape,
+} from "./types";
 
 export class Keyboard {
   private handlers: Handlers = [];
@@ -30,7 +43,7 @@ export class Keyboard {
 
     const candidates = this.handlers.filter((handler) => {
       for (const key of handler.keys) {
-        if (key.key == "any") return true;
+        if (key.key === ANYKEY) return true;
 
         if (key.platform) {
           const browserPlatform = this.config.platform ?? detectOsInBrowser();
@@ -86,7 +99,7 @@ export class Keyboard {
         if (Array.isArray(run)) {
           if (
             !run.some((element) => {
-              return element && document.activeElement && element == document.activeElement;
+              return element && document.activeElement && element === document.activeElement;
             })
           )
             return;
@@ -276,7 +289,7 @@ export class Keyboard {
         )
         .filter((k) => !!k);
 
-      if (keys.find((k) => k.key === "any")) {
+      if (keys.find((k) => k.key === ANYKEY)) {
         keys = [anyKeyData()];
       }
 

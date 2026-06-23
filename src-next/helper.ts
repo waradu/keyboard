@@ -1,4 +1,5 @@
 import {
+  ANYKEY,
   keys,
   platforms,
   SEPARATOR,
@@ -7,8 +8,8 @@ import {
   type KeyValue,
   type ModifierValue,
   type PlatformValue,
-} from "../src/keys";
-import type { CreateKeybindShape, KeybindShape } from "./types";
+} from "./keys";
+import type { CreateKeybindShape, KeybindShape, Os } from "./types";
 
 export function merge<T extends Record<string, any>>(...configs: Array<Partial<T> | undefined>): T {
   const isObj = (v: unknown) => v !== null && typeof v === "object" && !Array.isArray(v);
@@ -32,7 +33,7 @@ export function merge<T extends Record<string, any>>(...configs: Array<Partial<T
 }
 
 export const anyKeyData: () => KeybindShape = () => ({
-  key: "any",
+  key: ANYKEY,
   modifiers: {
     alt: false,
     control: false,
@@ -45,7 +46,7 @@ export const anyKeyData: () => KeybindShape = () => ({
  * Parse a key string into parts. Returns `undefined` if the string is invalid.
  */
 export const parseKeyString = (sequence: KeyString): KeybindShape | undefined => {
-  if (sequence === "any") {
+  if (sequence === ANYKEY) {
     return anyKeyData();
   }
 
@@ -98,3 +99,30 @@ export const parseCreateKeybindShape = (shape: CreateKeybindShape): KeybindShape
     key: shape.key,
   };
 };
+
+export const isEditableElement = (element: Element): boolean => {
+  const editableElements = [
+    "INPUT",
+    "TEXTAREA",
+    '[contenteditable="true"]',
+    '[contenteditable="plaintext-only"]',
+  ];
+  return editableElements.some((selector) => element.matches(selector));
+};
+
+export function detectOsInBrowser(): Os {
+  if (typeof navigator === "undefined") return "unknown";
+
+  const platform = (navigator.platform || "").toLowerCase();
+  const ua = (navigator.userAgent || "").toLowerCase();
+
+  if (platform.includes("mac")) return "macos";
+  if (platform.includes("win")) return "windows";
+  if (platform.includes("linux")) return "linux";
+
+  if (ua.includes("mac os")) return "macos";
+  if (ua.includes("windows")) return "windows";
+  if (ua.includes("linux") || ua.includes("x11")) return "linux";
+
+  return "unknown";
+}
