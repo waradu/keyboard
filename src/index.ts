@@ -25,7 +25,9 @@ export class Keyboard {
   private subscribers: SubscribeCallback[] = [];
   private pressed = new Set<KeyValue>();
 
-  constructor(private config: KeyboardConfig = {}) {}
+  constructor(private config: KeyboardConfig = {}) {
+    this.init();
+  }
 
   private log(...data: any[]) {
     if (this.config.debug) console.log("<KEYBOARD>", ...data);
