@@ -1,21 +1,15 @@
-import { parseKeyData } from "../src/helper";
-import type { KeyString } from "../src/keys";
-import type {
-  Config,
-  Handlers,
-  KeyboardConfig,
-  Listener,
-  Options,
-  SubscribeCallback,
-} from "../src/types";
-import { merge } from "./helper";
+import { detectOsInBrowser, isEditableElement } from "../src/helper";
+import { keys, type KeyKey, type KeyString, type KeyValue } from "../src/keys";
+import type { Config, KeyboardConfig } from "../src/types";
+import { merge, parseKeyString, parseCreateKeybindShape, anyKeyData } from "./helper";
+import type { Handler, Handlers, SubscribeCallback, Options, KeybindShape } from "./types";
 
 export class Keyboard {
   private handlers: Handlers = [];
   private layers = new Set<string>();
+  private disabledLayers = new Set<string>();
   private subscribers: SubscribeCallback[] = [];
-
-  private pressed = new Set<string>();
+  private pressed = new Set<KeyValue>();
 
   constructor(private config: KeyboardConfig = {}) {}
 
@@ -25,14 +19,126 @@ export class Keyboard {
 
   private onKeydown(event: KeyboardEvent) {
     if (event.isComposing) return;
-    this.pressed.delete(event.key);
-    this.log(`pressed '${event.key}'`);
+
+    const eventKey = event.key.toLowerCase();
+    const key = keys[eventKey as KeyKey];
+
+    if (key) {
+      this.pressed.add(key);
+      this.log(`pressed '${key}'`);
+    }
+
+    const candidates = this.handlers.filter((handler) => {
+      for (const key of handler.keys) {
+        if (key.key == "any") return true;
+
+        if (key.platform) {
+          const browserPlatform = this.config.platform ?? detectOsInBrowser();
+
+          if (key.platform === "linux" && browserPlatform !== "linux") continue;
+          if (key.platform === "win" && browserPlatform !== "windows") continue;
+          if (key.platform === "macos" && browserPlatform !== "macos") continue;
+          if (key.platform === "no-linux" && browserPlatform === "linux") continue;
+          if (key.platform === "no-win" && browserPlatform === "windows") continue;
+          if (key.platform === "no-macos" && browserPlatform === "macos") continue;
+        }
+
+        const pressedArray = Array.from(this.pressed);
+        const firstKey = pressedArray[pressedArray.length - 1];
+
+        if (key.key === "$num" && Number.isNaN(parseInt(firstKey!))) {
+          continue;
+        } else if (key.key !== "$num" && !Array.from(this.pressed).includes(key.key)) {
+          continue;
+        }
+
+        if (key.modifiers.shift !== event.shiftKey) continue;
+        if (key.modifiers.alt !== event.altKey) continue;
+        if (key.modifiers.control !== event.ctrlKey) continue;
+        if (key.modifiers.meta !== event.metaKey) continue;
+
+        const hasActiveLayer = handler.config.layers?.some(
+          (layer) => !this.disabledLayers.has(layer),
+        );
+
+        return hasActiveLayer ?? true;
+      }
+
+      return false;
+    });
+
+    if (candidates.length === 0) return;
+
+    candidates.forEach(async (handler) => {
+      const activeElement = document.activeElement;
+
+      if (
+        handler.config?.ignoreIfEditable &&
+        activeElement &&
+        activeElement instanceof Element &&
+        isEditableElement(activeElement)
+      )
+        return;
+
+      if (handler.config?.runIfFocused) {
+        const run = handler.config?.runIfFocused;
+
+        if (Array.isArray(run)) {
+          if (
+            !run.some((element) => {
+              return element && document.activeElement && element == document.activeElement;
+            })
+          )
+            return;
+        }
+      }
+
+      if (handler.config?.prevent) event.preventDefault();
+      if (handler.config?.stop === true) event.stopPropagation();
+      if (handler.config?.stop === "immediate") event.stopImmediatePropagation();
+      if (handler.config?.stop === "both") {
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+      }
+
+      const pressedKeysArray = Array.from(this.pressed);
+      const pressedNumber = parseInt(pressedKeysArray[pressedKeysArray.length - 1]!);
+
+      if (!handler.config.when) {
+        return;
+      } else if (typeof handler.config.when === "function") {
+        try {
+          const when = await handler.config.when();
+          if (!when) return;
+        } catch (e) {
+          console.error(e);
+          return;
+        }
+      }
+
+      handler.handler({
+        template: Number.isNaN(pressedNumber) ? undefined : pressedNumber,
+        handler,
+        event,
+      });
+
+      this.log(`handled '${handler.id}'`);
+
+      if (handler.config?.once) this.unbind(handler.id);
+    });
   }
 
   private onKeyup(event: KeyboardEvent) {
     if (event.isComposing) return;
-    this.pressed.delete(event.key);
-    this.log(`released '${event.key}'`);
+
+    const eventKey = event.key.toLowerCase();
+    const key = keys[eventKey as KeyKey];
+    this.pressed.delete(event.key as KeyValue);
+
+    if (key) {
+      this.pressed.delete(key);
+      this.log(`released '${key}'`);
+    }
   }
 
   private onBlur() {
@@ -164,10 +270,14 @@ export class Keyboard {
         option.keys = [option.keys];
       }
 
-      let keys = option.keys.map((key) => (typeof key === "string" ? key : parseKeyData(key)));
+      let keys = option.keys
+        .map((key) =>
+          typeof key === "string" ? parseKeyString(key) : parseCreateKeybindShape(key),
+        )
+        .filter((k) => !!k);
 
-      if (keys.includes("any")) {
-        keys = ["any"];
+      if (keys.find((k) => k.key === "any")) {
+        keys = [anyKeyData()];
       }
 
       const id = Math.random().toString(36).slice(2, 7);
@@ -178,7 +288,7 @@ export class Keyboard {
       };
       if (local?.signal) local.signal.addEventListener("abort", onAbort, { once: true });
 
-      const handler: Listener = {
+      const handler: Handler = {
         id,
         off: onAbort,
         keys: keys,
@@ -236,6 +346,57 @@ export class Keyboard {
    * Check if Key String listener already exists.
    */
   exists(sequence: KeyString) {
-    return this.handlers.some((handler) => handler.keys.includes(sequence));
+    const shape = parseKeyString(sequence);
+    if (!shape) return false;
+
+    return this.handlers.some((handler) => {
+      for (const key of handler.keys) {
+        if (key.key !== shape.key) continue;
+        if (key.platform !== shape.platform) continue;
+        if (key.modifiers.shift !== shape.modifiers.shift) continue;
+        if (key.modifiers.alt !== shape.modifiers.alt) continue;
+        if (key.modifiers.control !== shape.modifiers.control) continue;
+        if (key.modifiers.meta !== shape.modifiers.meta) continue;
+
+        return true;
+      }
+
+      return false;
+    });
+  }
+
+  /**
+   * Record pressed keys and emit them as a KeybindShape.
+   *
+   * @param callback Receives each recorded keybind shape.
+   * @returns Function to stop recording.
+   */
+  record(cb: (sequence: KeybindShape) => void) {
+    const handler = (event: KeyboardEvent): KeybindShape | undefined => {
+      if (event.isComposing) return;
+
+      const eventKey = event.key.toLowerCase();
+      const key = keys[eventKey as KeyKey];
+
+      if (!key) return;
+
+      cb({
+        key,
+        modifiers: {
+          shift: event.shiftKey,
+          alt: event.altKey,
+          control: event.ctrlKey,
+          meta: event.metaKey,
+        },
+      });
+    };
+
+    if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
+      window.addEventListener("keydown", handler);
+      return () => window.removeEventListener("keydown", handler);
+    }
+
+    this.log("ERROR: window was not found for recording");
+    return () => {};
   }
 }

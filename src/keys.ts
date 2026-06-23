@@ -32,7 +32,6 @@ export const keys = {
   "7": "7",
   "8": "8",
   "9": "9",
-  dynamicNum: "$num",
 
   // Letters
   a: "a",
@@ -116,6 +115,9 @@ export const keys = {
   $: "dollar",
   "?": "question-mark",
   "!": "exclamation-mark",
+
+  // Templates
+  dynNum: "$num",
 } as const;
 
 export const modifiers = {
