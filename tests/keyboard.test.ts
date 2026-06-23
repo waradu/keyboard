@@ -218,7 +218,7 @@ test("keyboard handler only fires if all keys have been pressed", () => {
   const { keyboard, spy } = prepare();
 
   keyboard.bind({
-    keys: ["control+y"],
+    keys: ["ctrl+y"],
     run: spy,
   });
 
@@ -237,7 +237,7 @@ test("keyboard handler only fires if all keys are being pressed together", () =>
   const { keyboard, spy } = prepare();
 
   keyboard.bind({
-    keys: ["control+y"],
+    keys: ["ctrl+y"],
     run: spy,
   });
 
@@ -255,7 +255,7 @@ test("keyboard handler can handle complex keybinds", () => {
   const { keyboard, spy } = prepare();
 
   keyboard.bind({
-    keys: ["meta+control+alt+shift+arrow-up"],
+    keys: ["meta+ctrl+alt+shift+arrow-up"],
     run: spy,
   });
 
@@ -340,17 +340,17 @@ test("parse key string into key data", () => {
     key: "x",
     modifiers: {
       alt: false,
-      control: false,
+      ctrl: false,
       meta: false,
       shift: false,
     },
   });
 
-  expect(parseKeyString("meta+control+alt+shift+arrow-up")).toEqual({
+  expect(parseKeyString("meta+ctrl+alt+shift+arrow-up")).toEqual({
     key: "arrow-up",
     modifiers: {
       alt: true,
-      control: true,
+      ctrl: true,
       meta: true,
       shift: true,
     },
@@ -361,7 +361,7 @@ test("parse key string into key data", () => {
     key: "x",
     modifiers: {
       alt: false,
-      control: false,
+      ctrl: false,
       meta: false,
       shift: false,
     },
@@ -371,7 +371,7 @@ test("parse key string into key data", () => {
     key: "$num",
     modifiers: {
       alt: true,
-      control: false,
+      ctrl: false,
       meta: false,
       shift: false,
     },
@@ -381,14 +381,14 @@ test("parse key string into key data", () => {
     key: "$any",
     modifiers: {
       alt: false,
-      control: false,
+      ctrl: false,
       meta: false,
       shift: false,
     },
   });
 
   //@ts-expect-error out of order
-  expect(parseKeyString("meta+alt+control+k")).toBeUndefined();
+  expect(parseKeyString("meta+alt+ctrl+k")).toBeUndefined();
   //@ts-expect-error mac does not exist
   expect(parseKeyString("mac:k")).toBeUndefined();
   //@ts-expect-error notreal is not a real key (duh)

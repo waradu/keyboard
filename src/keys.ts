@@ -3,7 +3,7 @@ export const ANYKEY = "$any" as const;
 export type AnyKey = typeof ANYKEY;
 
 export const keys = {
-  // Control / system (without modifiers)
+  // Ctrl / system (without modifiers)
   backspace: "backspace",
   tab: "tab",
   enter: "enter",
@@ -136,7 +136,7 @@ export const keys = {
 
 export const modifiers = {
   meta: "meta",
-  control: "control",
+  ctrl: "ctrl",
   alt: "alt",
   shift: "shift",
 } as const;
@@ -165,7 +165,7 @@ type FixedCombinations<T extends readonly string[], Acc extends string[] = []> =
   ? FixedCombinations<R, Acc> | FixedCombinations<R, [...Acc, F]>
   : Acc;
 
-type PrefixTuples = Exclude<FixedCombinations<["meta", "control", "alt", "shift"]>, []>;
+type PrefixTuples = Exclude<FixedCombinations<["meta", "ctrl", "alt", "shift"]>, []>;
 
 type Join<T extends readonly string[]> = T extends []
   ? ""

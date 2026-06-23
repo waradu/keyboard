@@ -81,7 +81,7 @@ export class Keyboard {
 
         if (key.modifiers.shift !== event.shiftKey) continue;
         if (key.modifiers.alt !== event.altKey) continue;
-        if (key.modifiers.control !== event.ctrlKey) continue;
+        if (key.modifiers.ctrl !== event.ctrlKey) continue;
         if (key.modifiers.meta !== event.metaKey) continue;
 
         if (!handler.config.layers || handler.config.layers.length === 0) return true;
@@ -416,7 +416,7 @@ export class Keyboard {
         if (key.platform !== shape.platform) continue;
         if (key.modifiers.shift !== shape.modifiers.shift) continue;
         if (key.modifiers.alt !== shape.modifiers.alt) continue;
-        if (key.modifiers.control !== shape.modifiers.control) continue;
+        if (key.modifiers.ctrl !== shape.modifiers.ctrl) continue;
         if (key.modifiers.meta !== shape.modifiers.meta) continue;
 
         return true;
@@ -446,7 +446,7 @@ export class Keyboard {
         modifiers: {
           shift: event.shiftKey,
           alt: event.altKey,
-          control: event.ctrlKey,
+          ctrl: event.ctrlKey,
           meta: event.metaKey,
         },
       });

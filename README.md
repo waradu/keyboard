@@ -33,7 +33,7 @@ import { Keyboard } from "@waradu/keyboard";
 const keyboard = new Keyboard();
 
 const off = keyboard.bind({
-  keys: "control+k",
+  keys: "ctrl+k",
   run({ event }) {
     console.log("pressed", event.key);
   },
@@ -70,13 +70,13 @@ const off = useKeybind({
 ```ts
 useKeybind([
   {
-    keys: "control+z",
+    keys: "ctrl+z",
     run() {
       console.log("undo");
     },
   },
   {
-    keys: "control+shift+z",
+    keys: "ctrl+shift+z",
     run() {
       console.log("redo");
     },
@@ -141,7 +141,7 @@ export default defineNuxtConfig({
 
 ```ts
 const off = keyboard.bind({
-  keys: ["control+y", "control+shift+z"],
+  keys: ["ctrl+y", "ctrl+shift+z"],
   run() {
     console.log("redo");
   },
@@ -173,13 +173,13 @@ keyboard.bind({
 ```ts
 keyboard.bind([
   {
-    keys: "control+z",
+    keys: "ctrl+z",
     run() {
       console.log("undo");
     },
   },
   {
-    keys: "control+shift+z",
+    keys: "ctrl+shift+z",
     run() {
       console.log("redo");
     },
@@ -193,7 +193,7 @@ You can pass shared config as the second argument:
 keyboard.bind(
   [
     {
-      keys: "control+s",
+      keys: "ctrl+s",
       run() {
         console.log("save");
       },
@@ -220,7 +220,7 @@ unsubscribe();
 ```ts
 const stop = keyboard.record((sequence) => {
   console.log(sequence);
-  // { key: "k", modifiers: { meta: true, control: false, alt: false, shift: true } }
+  // { key: "k", modifiers: { meta: true, ctrl: false, alt: false, shift: true } }
 });
 
 stop();
@@ -232,10 +232,10 @@ stop();
 import { parseKeyString } from "@waradu/keyboard";
 
 parseKeyString("meta+shift+k");
-// { key: "k", modifiers: { meta: true, control: false, alt: false, shift: true } }
+// { key: "k", modifiers: { meta: true, ctrl: false, alt: false, shift: true } }
 
 parseKeyString("macos:meta+k");
-// { platform: "macos", key: "k", modifiers: { meta: true, control: false, alt: false, shift: false } }
+// { platform: "macos", key: "k", modifiers: { meta: true, ctrl: false, alt: false, shift: false } }
 
 parseKeyString("unknown+k");
 // undefined
@@ -248,7 +248,7 @@ Key strings describe the key and modifiers that must be active for a handler to 
 The structure is:
 
 ```txt
-(platform:)?(meta+)?(control+)?(alt+)?(shift+)?key
+(platform:)?(meta+)?(ctrl+)?(alt+)?(shift+)?key
 ```
 
 Special keys:
@@ -265,19 +265,19 @@ Platform prefixes:
 - `no-win`
 - `no-linux`
 
-The modifier order is fixed: `meta`, `control`, `alt`, `shift`, then the key.
+The modifier order is fixed: `meta`, `ctrl`, `alt`, `shift`, then the key.
 
 Examples:
 
-- `"control+x"`: valid
-- `"meta+control+alt+shift+arrow-up"`: valid
+- `"ctrl+x"`: valid
+- `"meta+ctrl+alt+shift+arrow-up"`: valid
 - `"c"`: valid
 - `"macos:x"`: valid
 - `"alt+$num"`: valid
 - `"$any"`: valid
 - `""`: invalid
 - `"shift+alt+y"`: invalid, because `shift` comes after `alt`
-- `"meta+control"`: invalid, because the key is missing
+- `"meta+ctrl"`: invalid, because the key is missing
 - `"lunix:x"`: invalid platform
 - `"xy"`: invalid, because only one key can be used
 
@@ -417,7 +417,7 @@ Directives are Nuxt-only. Pass the handler to `v-keybind` and use the directive 
 Use directive modifiers for keyboard modifiers, `prevent`, and `once`:
 
 ```html
-<input type="text" v-keybind.control.shift.once.prevent:enter="onEnter" />
+<input type="text" v-keybind.ctrl.shift.once.prevent:enter="onEnter" />
 ```
 
 The directive arg is the key. For platform-aware or multi-key bindings, use `useKeybind`.
@@ -530,7 +530,7 @@ Prevent default behavior:
 
 ```ts
 keyboard.bind({
-  keys: "control+r",
+  keys: "ctrl+r",
   run() {
     console.log("Refresh prevented");
   },
@@ -559,13 +559,13 @@ Platform-aware undo and redo:
 ```ts
 keyboard.bind([
   {
-    keys: ["no-macos:control+z", "macos:meta+z"],
+    keys: ["no-macos:ctrl+z", "macos:meta+z"],
     run() {
       console.log("undo");
     },
   },
   {
-    keys: ["no-macos:control+shift+z", "macos:meta+shift+z"],
+    keys: ["no-macos:ctrl+shift+z", "macos:meta+shift+z"],
     run() {
       console.log("redo");
     },

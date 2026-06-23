@@ -37,13 +37,13 @@ export const anyKeyData: () => KeybindShape = () => ({
   key: ANYKEY,
   modifiers: {
     alt: false,
-    control: false,
+    ctrl: false,
     meta: false,
     shift: false,
   },
 });
 
-const MOD_ORDER: ModifierValue[] = ["meta", "control", "alt", "shift"];
+const MOD_ORDER: ModifierValue[] = ["meta", "ctrl", "alt", "shift"];
 
 export type ModifierMap = Partial<Record<ModifierValue, boolean>>;
 
@@ -86,7 +86,7 @@ export const parseKeyString = (sequence: KeyString): KeybindShape | undefined =>
 
   const modifierMap: Record<ModifierValue, boolean> = {
     alt: false,
-    control: false,
+    ctrl: false,
     meta: false,
     shift: false,
   };
@@ -107,7 +107,7 @@ export const parseCreateKeybindShape = (shape: CreateKeybindShape): KeybindShape
     modifiers: {
       shift: shape.modifiers?.shift ?? false,
       alt: shape.modifiers?.alt ?? false,
-      control: shape.modifiers?.control ?? false,
+      ctrl: shape.modifiers?.ctrl ?? false,
       meta: shape.modifiers?.meta ?? false,
     },
     key: shape.key,

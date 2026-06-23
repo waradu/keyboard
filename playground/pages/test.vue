@@ -21,7 +21,7 @@ useKeybind([
     },
   },
   {
-    keys: ["control+b"],
+    keys: ["ctrl+b"],
     run() {
       console.log("RUN BB");
     },
@@ -29,7 +29,7 @@ useKeybind([
 ]);
 
 useKeybind({
-  keys: ["control+r", "meta+r"],
+  keys: ["ctrl+r", "meta+r"],
   run() {
     console.log("Refresh prevented!");
   },
@@ -56,13 +56,13 @@ useKeybind([
     },
   },
   {
-    keys: ["win:control+x"],
+    keys: ["win:ctrl+x"],
     run() {
       console.log("Hello from 'windows'.");
     },
   },
   {
-    keys: ["linux:control+x"],
+    keys: ["linux:ctrl+x"],
     run() {
       console.log("Hello from 'linux'.");
     },
@@ -79,7 +79,7 @@ editor.bind({
 });
 
 useKeybind({
-  keys: "control+y",
+  keys: "ctrl+y",
   run() {
     editor.toggle();
     console.log("Editor layer toggled");

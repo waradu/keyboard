@@ -4,10 +4,10 @@ import type { KeyString } from "../src/keys";
 
 [
   // Simple KeyString
-  "control+x",
+  "ctrl+x",
 
   // Complex KeyString
-  "meta+control+alt+shift+arrow-up",
+  "meta+ctrl+alt+shift+arrow-up",
 
   // Single Key
   "c",
@@ -28,7 +28,7 @@ import type { KeyString } from "../src/keys";
   "shift+alt+y",
 
   // @ts-expect-error `key` is required
-  "meta+control",
+  "meta+ctrl",
 
   // @ts-expect-error `lunix` is not a valid platform
   "lunix:x",

@@ -14,7 +14,7 @@ useKeybind([
     },
   },
   {
-    keys: ["control+b"],
+    keys: ["ctrl+b"],
     run() {
       console.log("RUN AB");
     },
@@ -23,13 +23,13 @@ useKeybind([
 
 useKeybind([
   {
-    keys: ["no-macos:control+z", "macos:meta+z"],
+    keys: ["no-macos:ctrl+z", "macos:meta+z"],
     run() {
       console.log("undo");
     },
   },
   {
-    keys: ["no-macos:control+shift+z", "macos:meta+shift+z"],
+    keys: ["no-macos:ctrl+shift+z", "macos:meta+shift+z"],
     run() {
       console.log("redo");
     },
