@@ -6,7 +6,7 @@ import type { Handler, Handlers, SubscribeCallback, Options, KeybindShape } from
 
 export class Keyboard {
   private handlers: Handlers = [];
-  private layers = new Set<string>();
+  private allLayers = new Set<string>();
   private disabledLayers = new Set<string>();
   private subscribers: SubscribeCallback[] = [];
   private pressed = new Set<KeyValue>();
@@ -253,7 +253,7 @@ export class Keyboard {
       options = [options];
     }
 
-    for (const option of options) option.config?.layers?.map(this.layers.add);
+    for (const option of options) option.config?.layers?.map(this.allLayers.add);
 
     const results = options.map((option) => {
       const local = merge<Config>(option.config, config, {
@@ -399,4 +399,111 @@ export class Keyboard {
     this.log("ERROR: window was not found for recording");
     return () => {};
   }
+
+  layers = {
+    /**
+     * Create new keybind layer.
+     */
+    create: (layer: string, disabled?: boolean) => {
+      const offs: (() => void)[] = [];
+
+      this.allLayers.add(layer);
+      if (disabled) this.disabledLayers.add(layer);
+
+      return {
+        /**
+         * Disable these layers
+         */
+        disable: () => {
+          this.disabledLayers.add(layer);
+        },
+        /**
+         * Enable these layers
+         */
+        enable: () => {
+          this.disabledLayers.delete(layer);
+        },
+        /**
+         * Enable these layers
+         */
+        toggle: () => {
+          if (this.disabledLayers.has(layer)) {
+            this.disabledLayers.delete(layer);
+          } else {
+            this.disabledLayers.add(layer);
+          }
+        },
+        bind: ((...args: Parameters<typeof this.bind>) => {
+          const config = { ...args[1] };
+          if (!config.layers) config.layers = [];
+          config.layers.push(layer);
+
+          const binding = this.bind(args[0], config);
+          offs.push(binding);
+          return binding;
+        }) as typeof this.bind,
+        /**
+         * Disables all listeners in layer.
+         */
+        off: () => {
+          for (const off of offs) {
+            off();
+          }
+        },
+      };
+    },
+    /**
+     * Enable specific layers.
+     */
+    enable: (layers: string | string[]) => {
+      if (!Array.isArray(layers)) {
+        layers = [layers];
+      }
+
+      for (const layer of layers) {
+        this.disabledLayers.delete(layer);
+      }
+    },
+    /**
+     * Disable all layers.
+     */
+    disable: (layers: string | string[]) => {
+      if (!Array.isArray(layers)) {
+        layers = [layers];
+      }
+
+      for (const layer of layers) {
+        this.disabledLayers.add(layer);
+      }
+    },
+    /**
+     * Set active layers.
+     */
+    set: (layers: string | string[]) => {
+      if (!Array.isArray(layers)) {
+        layers = [layers];
+      }
+
+      this.disabledLayers.clear();
+
+      for (const layer of this.allLayers) {
+        if (layers.includes(layer)) continue;
+        this.disabledLayers.add(layer);
+      }
+    },
+    /**
+     * Enable all layers.
+     */
+    all: () => {
+      this.disabledLayers.clear();
+    },
+    /**
+     * Disable all layers.
+     */
+    none: () => {
+      for (const layer of this.allLayers) {
+        this.disabledLayers.add(layer);
+      }
+    },
+  };
 }
