@@ -334,6 +334,8 @@ test("parse key string into key data", () => {
     },
   });
 
+  //@ts-expect-error out of order
+  expect(parseKeyString("meta+alt+control+k")).toBeUndefined();
   //@ts-expect-error mac does not exist
   expect(parseKeyString("mac:k")).toBeUndefined();
   //@ts-expect-error notreal is not a real key (duh)

@@ -1,6 +1,7 @@
 import {
   ANYKEY,
   keys,
+  modifiers,
   platforms,
   SEPARATOR,
   type KeySequence,
@@ -42,6 +43,10 @@ export const anyKeyData: () => KeybindShape = () => ({
   },
 });
 
+const MOD_ORDER: ModifierValue[] = ["meta", "control", "alt", "shift"];
+
+export type ModifierMap = Partial<Record<ModifierValue, boolean>>;
+
 /**
  * Parse a key string into parts. Returns `undefined` if the string is invalid.
  */
@@ -68,7 +73,16 @@ export const parseKeyString = (sequence: KeyString): KeybindShape | undefined =>
   const validKeyValues = new Set(Object.values(keys));
   if (!validKeyValues.has(key)) return;
 
+  const modSet = new Set(Object.values(modifiers));
   const modifiersOnly = parts as ModifierValue[];
+
+  let lastIndex = -1;
+  for (const mod of modifiersOnly) {
+    if (!modSet.has(mod)) return;
+    const idx = MOD_ORDER.indexOf(mod);
+    if (idx === -1 || idx < lastIndex) return;
+    lastIndex = idx;
+  }
 
   const modifierMap: Record<ModifierValue, boolean> = {
     alt: false,
