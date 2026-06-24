@@ -59,7 +59,8 @@ export const parseKeyString = (sequence: KeyString): KeybindShape | undefined =>
   let keySequence: KeySequence = sequence as KeySequence;
 
   if (sequence.includes(":")) {
-    const [platform, seq] = sequence.split(":") as [PlatformValue, KeySequence];
+    const [platform, seq, ...rest] = sequence.split(":") as [PlatformValue, KeySequence];
+    if (rest.length) return;
     if (!Object.values(platforms).includes(platform)) return;
 
     platformLabel = platform;
