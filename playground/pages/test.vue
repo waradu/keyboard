@@ -29,7 +29,7 @@ useKeybind([
 ]);
 
 useKeybind({
-  keys: ["ctrl+r", "meta+r"],
+  keys: ["ctrl-cmd+r"],
   run() {
     console.log("Refresh prevented!");
   },
