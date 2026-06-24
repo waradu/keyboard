@@ -11,6 +11,7 @@ import {
   type ModifierValue,
   type PlatformValue,
 } from "./keys";
+import { readableMap } from "./others";
 import type { CreateKeybindShape, KeybindShape, OptionsKeys, Os } from "./types";
 
 export class Keybind {
@@ -51,17 +52,16 @@ export class Keybind {
    * @returns A human-readable key label.
    */
   toReadableKey() {
-    switch (this.key) {
-      case "$any":
-        return "Any";
-      case "$num":
-        return "Any Number";
-      default:
-        return this.key
-          .split("-")
-          .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-          .join("-");
+    const name = readableMap[this.key];
+
+    if (!name) {
+      return this.key
+        .split("-")
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join("-");
     }
+
+    return name;
   }
 
   /**

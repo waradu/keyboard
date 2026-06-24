@@ -467,3 +467,15 @@ test("parse key string into key data", () => {
   //@ts-expect-error notreal is not a real key (duh)
   expect(Keybind.fromString("meta+notreal")).toBeUndefined();
 });
+
+test("formats special readable key labels", () => {
+  expect(Keybind.fromString("a")?.toReadableKey()).toBe("A");
+  expect(Keybind.fromString("4")?.toReadableKey()).toBe("4");
+  expect(Keybind.fromString("f12")?.toReadableKey()).toBe("F12");
+  expect(Keybind.fromString("arrow-left")?.toReadableKey()).toBe("Arrow Left");
+  expect(Keybind.fromString("page-down")?.toReadableKey()).toBe("Page Down");
+  expect(Keybind.fromString("audio-volume-up")?.toReadableKey()).toBe("Volume Up");
+  expect(Keybind.fromString("slash")?.toReadableKey()).toBe("/");
+  expect(Keybind.fromString("$any")?.toReadableKey()).toBe("Any");
+  expect(Keybind.fromString("alt+$num")?.toReadableKey()).toBe("Any Number");
+});
