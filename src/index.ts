@@ -51,10 +51,10 @@ export class Keyboard {
       this.log(`pressed '${key}'`);
     }
 
+    const browserPlatform = this.config.platform ?? detectOsInBrowser();
+
     const candidates = this.handlers.filter((handler) => {
       for (const key of handler.keys) {
-        const browserPlatform = this.config.platform ?? detectOsInBrowser();
-
         if (key.platform) {
           if (key.platform === "linux" && browserPlatform !== "linux") continue;
           if (key.platform === "win" && browserPlatform !== "windows") continue;
@@ -66,13 +66,13 @@ export class Keyboard {
 
         if (key.key !== ANYKEY) {
           const pressedArray = Array.from(this.pressed);
-          const firstKey = pressedArray[pressedArray.length - 1];
+          const lastPressed = pressedArray[pressedArray.length - 1];
 
-          if (!firstKey) continue;
+          if (!lastPressed) continue;
 
-          if (key.key === "$num" && Number.isNaN(parseInt(firstKey!))) {
+          if (key.key === "$num" && Number.isNaN(parseInt(lastPressed!))) {
             continue;
-          } else if (key.key !== "$num" && firstKey !== key.key) {
+          } else if (key.key !== "$num" && lastPressed !== key.key) {
             continue;
           }
 
@@ -139,8 +139,9 @@ export class Keyboard {
         event.stopImmediatePropagation();
       }
 
-      const pressedKeysArray = Array.from(this.pressed);
-      const pressedNumber = parseInt(pressedKeysArray[pressedKeysArray.length - 1]!);
+      const pressedArray = Array.from(this.pressed);
+      const lastPressed = pressedArray[pressedArray.length - 1]!;
+      const pressedNumber = lastPressed ? parseInt(lastPressed) : undefined;
 
       try {
         handler.handler({
