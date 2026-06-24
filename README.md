@@ -445,12 +445,17 @@ Rewrite started in `552b0f14cd5e71ccdf08d1e74d42da58115f70b9`.
 
 - Replaced `useKeyboard()` with the `Keyboard` class
 - Renamed `keyboard.listen` to `keyboard.bind`
+- Renamed the `control` modifier to `ctrl`
 - Changed key-string separators from `_` to `+`
 - Changed catch-all key from `any` to `$any`
 - Changed keybind data to `KeybindShape` / `CreateKeybindShape`
 - Removed `parseKeyData`
 - Added automatic initialization when `window` is available
-- Kept Nuxt module support with `useKeybind`, `useKeybindLayer`, `useKeyboardInspector`, `useKeybindRecorder`, and `v-keybind`
+- Added `ctrl-cmd` as a cross-platform Cmd/Ctrl modifier
+- Added `pause()`, `resume()`, and `toggle()` for temporarily pausing the keyboard
+- Redesigned the Nuxt directive API to use `v-keybind:sequence` with `.prevent` and `.stop`
+- Improved editable element detection for inputs and contenteditable descendants
+- Tightened key-string parsing, modifier ordering, layer handling, and listener lifecycle behavior
 
 ### v8 -> v9
 
