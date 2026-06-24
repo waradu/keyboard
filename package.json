@@ -50,14 +50,14 @@
     "@nuxt/kit": "4.4.8"
   },
   "devDependencies": {
-    "@happy-dom/global-registrator": "^20.10.3",
+    "@happy-dom/global-registrator": "^20.10.6",
     "@nuxt/schema": "4.4.8",
     "@types/bun": "1.3.14",
     "@types/node": "^26.0.0",
     "lefthook": "^2.1.9",
     "nuxt": "4.4.8",
-    "oxfmt": "^0.54.0",
-    "oxlint": "^1.69.0",
+    "oxfmt": "^0.55.0",
+    "oxlint": "^1.70.0",
     "typescript": "6.0.3",
     "unbuild": "^3.0.0"
   }
