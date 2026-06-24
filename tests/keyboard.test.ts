@@ -109,6 +109,28 @@ test("keyboard handler ignores editable if set", () => {
   keyboard.destroy();
 });
 
+test("keyboard handler runs when non-editable input is focused", () => {
+  const { keyboard, spy } = prepare();
+
+  keyboard.bind({
+    keys: ["a"],
+    run: spy,
+    config: { ignoreIfEditable: true },
+  });
+
+  const ele = document.createElement("input");
+  ele.type = "checkbox";
+  document.body.appendChild(ele);
+  ele.focus();
+
+  press("a");
+
+  expect(spy).toHaveBeenCalledTimes(1);
+
+  ele.remove();
+  keyboard.destroy();
+});
+
 test("keyboard handler ignores focused descendants in contenteditable containers", () => {
   const { keyboard, spy } = prepare();
 

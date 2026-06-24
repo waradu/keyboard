@@ -122,7 +122,26 @@ export const parseCreateKeybindShape = (shape: CreateKeybindShape): KeybindShape
 };
 
 export const isEditableElement = (element: Element): boolean => {
-  if (element.matches("INPUT, TEXTAREA")) return true;
+  if (element instanceof HTMLTextAreaElement) {
+    return !element.readOnly && !element.disabled;
+  }
+
+  if (element instanceof HTMLInputElement) {
+    const nonEditableTypes = new Set([
+      "button",
+      "checkbox",
+      "color",
+      "file",
+      "hidden",
+      "image",
+      "radio",
+      "range",
+      "reset",
+      "submit",
+    ]);
+
+    return !element.readOnly && !element.disabled && !nonEditableTypes.has(element.type);
+  }
 
   const contentEditable = element.closest("[contenteditable]");
   if (!contentEditable) return false;
