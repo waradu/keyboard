@@ -31,8 +31,8 @@
       "import": "./dist/index.mjs"
     },
     "./nuxt": {
-      "types": "./dist/nuxt/index.d.mts",
-      "import": "./dist/nuxt/index.mjs"
+      "types": "./dist/nuxt/module.d.mts",
+      "import": "./dist/nuxt/module.mjs"
     }
   },
   "scripts": {

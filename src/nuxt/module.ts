@@ -1,7 +1,7 @@
 import { defineNuxtModule, addPlugin, createResolver, addImports } from "@nuxt/kit";
 import type { Nuxt } from "@nuxt/schema";
 
-import type { Keyboard } from "../";
+import type { Keyboard } from "..";
 import type { vKeybind } from "./runtime/directives";
 
 export interface ModuleOptions {

@@ -3,7 +3,7 @@ import { defineBuildConfig } from "unbuild";
 export default defineBuildConfig({
   entries: [
     "src/index",
-    "src/nuxt/index",
+    "src/nuxt/module",
     {
       builder: "mkdist",
       input: "src/nuxt/runtime",
