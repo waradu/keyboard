@@ -199,6 +199,7 @@ export class Keyboard {
       window.removeEventListener("keydown", this.onKeydown);
       window.removeEventListener("keyup", this.onKeyup);
       window.removeEventListener("blur", this.onBlur);
+      this.pressed.clear();
 
       this.ready = false;
 
