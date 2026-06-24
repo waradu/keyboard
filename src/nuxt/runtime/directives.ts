@@ -1,11 +1,12 @@
-import type { Options, KeyValue } from "@waradu/keyboard";
+import type { Options, KeySequence } from "@waradu/keyboard";
 import type { Directive } from "vue";
 
 import { useKeybind } from "./composables";
 
 const KEY = Symbol("keybind");
 
-type KeybindDirectiveModifier = "alt" | "ctrl" | "meta" | "ctrl-cmd" | "once" | "prevent" | "shift";
+type Modifiers = "prevent" | "stop";
+type Arg = KeySequence;
 
 type KeybindElement = HTMLElement & {
   [KEY]?: () => void;
@@ -18,42 +19,32 @@ function cleanup(el: KeybindElement) {
 
 function register(
   el: KeybindElement,
-  arg: KeyValue | undefined,
-  modifiers: Record<string, boolean>,
+  arg: Arg | undefined,
+  modifiers: Partial<Record<Modifiers, boolean>>,
   run: Options["run"],
 ) {
   cleanup(el);
   if (!arg || typeof run !== "function") return;
 
   el[KEY] = useKeybind({
-    keys: {
-      key: arg,
-      modifiers: {
-        alt: modifiers.alt,
-        ctrl: modifiers.ctrl,
-        ctrlCmd: modifiers["ctrl-cmd"],
-        meta: modifiers.meta,
-        shift: modifiers.shift,
-      },
-    },
+    keys: arg,
     run,
     config: {
       prevent: modifiers.prevent,
-      once: modifiers.once,
+      stop: modifiers.stop,
       runIfFocused: [el],
     },
   });
 }
 
-export const vKeybind: Directive<HTMLElement, Options["run"], KeybindDirectiveModifier, KeyValue> =
-  {
-    mounted(el, binding) {
-      register(el, binding.arg, binding.modifiers, binding.value);
-    },
-    updated(el, binding) {
-      register(el, binding.arg, binding.modifiers, binding.value);
-    },
-    unmounted(el) {
-      cleanup(el);
-    },
-  };
+export const vKeybind: Directive<HTMLElement, Options["run"], Modifiers, Arg> = {
+  mounted(el, binding) {
+    register(el, binding.arg, binding.modifiers, binding.value);
+  },
+  updated(el, binding) {
+    register(el, binding.arg, binding.modifiers, binding.value);
+  },
+  unmounted(el) {
+    cleanup(el);
+  },
+};

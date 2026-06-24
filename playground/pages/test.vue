@@ -4,7 +4,7 @@
   <pre>Info: ctrl/cmd + r to reload page is prevented as an example on this page.</pre>
   <input
     type="text"
-    v-keybind:enter="
+    v-keybind:ctrl+a.prevent="
       () => {
         console.log('Hello, Directive!');
       }

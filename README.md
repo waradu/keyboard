@@ -408,7 +408,7 @@ Available handler config:
 
 ## Directives
 
-Directives are Nuxt-only. Pass the handler to `v-keybind` and use the directive arg as the key.
+Directives are Nuxt-only. Pass the handler to `v-keybind` and use the directive arg as the key sequence.
 
 ```html
 <input
@@ -421,23 +421,19 @@ Directives are Nuxt-only. Pass the handler to `v-keybind` and use the directive 
 />
 ```
 
-Use directive modifiers for keyboard modifiers, `prevent`, and `once`:
+Put keyboard modifiers in the key sequence. `prevent` and `stop` are directive modifiers:
 
 ```html
-<input type="text" v-keybind:enter.ctrl.shift.once.prevent="onEnter" />
+<input type="text" v-keybind:ctrl+shift+enter.prevent.stop="onEnter" />
 ```
 
-Use `ctrl-cmd` as a directive modifier for the cross-platform Cmd/Ctrl key:
+Use `ctrl-cmd` in the key sequence for the cross-platform Cmd/Ctrl key:
 
 ```html
-<input type="text" v-keybind:k.ctrl-cmd="openCommandPalette" />
+<input type="text" v-keybind:ctrl-cmd+k="openCommandPalette" />
 ```
 
-The directive arg is the key. For platform-aware or multi-key bindings, use `useKeybind`.
-
-```html
-<input type="text" v-keybind:k.meta="openCommandPalette" />
-```
+For platform-aware or multi-key bindings, use `useKeybind`.
 
 The directive automatically limits the handler to that focused element.
 
