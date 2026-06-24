@@ -239,7 +239,7 @@ export class Keyboard {
    * Initialize the keyboard. Call this when `window` is available (it will fail silently).
    * You can define listeners before initializing.
    */
-  async init(opts?: { signal?: AbortSignal }) {
+  init(opts?: { signal?: AbortSignal }) {
     this.stop();
 
     if (typeof window !== "undefined") {
@@ -350,17 +350,13 @@ export class Keyboard {
 
       if (local.signal?.aborted) return;
 
-      if (!Array.isArray(option.keys)) {
-        option.keys = [option.keys];
-      }
-
       const keyArray = Array.isArray(option.keys) ? option.keys : [option.keys];
 
       let keys = keyArray.map((key) => Keybind.from(key)).filter((k) => !!k);
 
       if (!keys.length) return;
 
-      const id = crypto.randomUUID();
+      const id = Math.random().toString(36).slice(2, 7);
 
       const off = () => {
         const index = this.handlers.findIndex((handler) => handler.id === id);
