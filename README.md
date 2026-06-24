@@ -568,7 +568,7 @@ Platform-aware undo and redo:
 ```ts
 keyboard.bind([
   {
-    // With ctr-cmd
+    // With ctrl-cmd
     keys: "ctrl-cmd+z",
     run() {
       console.log("undo");

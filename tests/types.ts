@@ -1,6 +1,6 @@
 import type { KeyString } from "../src/keys";
 
-// Should not have any typescript errors
+// Should not have any TypeScript errors
 
 [
   // Simple KeyString
@@ -33,10 +33,10 @@ import type { KeyString } from "../src/keys";
   // @ts-expect-error `key` is required
   "meta+ctrl",
 
-  // @ts-expect-error `ctrl-cmd` can not be mixed with `meta`
+  // @ts-expect-error `ctrl-cmd` cannot be mixed with `meta`
   "meta+ctrl-cmd+k",
 
-  // @ts-expect-error `ctrl-cmd` can not be mixed with `ctrl`
+  // @ts-expect-error `ctrl-cmd` cannot be mixed with `ctrl`
   "ctrl+ctrl-cmd+k",
 
   // @ts-expect-error `lunix` is not a valid platform
