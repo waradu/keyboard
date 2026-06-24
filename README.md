@@ -227,14 +227,27 @@ stop();
 
 ### Keybinds
 
+Use `Keybind` when you need to parse, compare, format, or display shortcuts.
+
 ```ts
 import { Keybind } from "@waradu/keyboard";
 
-const keybind = Keybind.fromString("meta+shift+k");
+const keybind = Keybind.fromString("ctrl-cmd+shift+k");
 
-keybind?.toString(); // "meta+shift+k"
+keybind?.toString(); // "ctrl-cmd+shift+k"
 keybind?.toShape(); // { key, modifiers, platform? }
-keybind?.equals("meta+shift+k"); // true
+keybind?.equals("ctrl-cmd+shift+k"); // true
+Keybind.equals("ctrl+k", "ctrl+k"); // true
+```
+
+Readable methods return parts so you can join them into text or render them as separate keycaps.
+
+```ts
+keybind?.toReadable(); // ["Ctrl-Cmd", "Shift", "K"]
+keybind?.toLocalReadable({ platform: "macos" }); // ["Cmd", "Shift", "K"]
+keybind?.toLocalReadable({ platform: "windows" }); // ["Ctrl", "Shift", "K"]
+
+Keybind.fromString("no-macos:alt+enter")?.toReadablePlatform(); // "Linux & Windows"
 ```
 
 ## Key Strings
@@ -435,9 +448,7 @@ The directive automatically limits the handler to that focused element.
 
 ## Changes
 
-### v9.0.0
-
-Rewrite started in `552b0f14cd5e71ccdf08d1e74d42da58115f70b9`.
+### v8 -> v9
 
 - Replaced `useKeyboard()` with the `Keyboard` class
 - Renamed `keyboard.listen` to `keyboard.bind`
@@ -445,17 +456,12 @@ Rewrite started in `552b0f14cd5e71ccdf08d1e74d42da58115f70b9`.
 - Changed key-string separators from `_` to `+`
 - Changed catch-all key from `any` to `$any`
 - Added the `Keybind` class for parsing, formatting, comparing, and converting keybinds
+- Added readable `Keybind` labels for rendering shortcuts in UI
 - Added automatic initialization when `window` is available
 - Added `ctrl-cmd` as a cross-platform Cmd/Ctrl modifier
 - Added `pause()`, `resume()`, and `toggle()` for temporarily pausing the keyboard
 - Redesigned the Nuxt directive API to use `v-keybind:sequence` with `.prevent` and `.stop`
-- Improved editable element detection for inputs and contenteditable descendants
-- Tightened key-string parsing, modifier ordering, layer handling, and listener lifecycle behavior
-
-### v8 -> v9
-
 - Fixed run return type by ignoring it
-- Changed separator from `_` to `+`
 - Better and faster OS detection
 - Removed stats
 
