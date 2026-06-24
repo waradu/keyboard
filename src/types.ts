@@ -92,9 +92,9 @@ export interface Config {
    */
   layers?: string[];
   /**
-   * Boolean value or predicate function before each run whether the listener should run.
+   * Boolish value or predicate function before each run whether the listener should run.
    */
-  when?: boolean | (() => boolean | Promise<boolean>);
+  when?: unknown | (() => unknown);
 
   signal?: AbortSignal;
 }

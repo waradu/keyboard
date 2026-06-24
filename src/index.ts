@@ -95,7 +95,7 @@ export class Keyboard {
 
     if (candidates.length === 0) return;
 
-    candidates.forEach(async (handler) => {
+    candidates.forEach((handler) => {
       const activeElement = document.activeElement;
 
       if (
@@ -123,7 +123,7 @@ export class Keyboard {
         return;
       } else if (typeof handler.config.when === "function") {
         try {
-          const when = await handler.config.when();
+          const when = handler.config.when();
           if (!when) return;
         } catch (e) {
           console.error(e);
