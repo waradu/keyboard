@@ -356,7 +356,7 @@ export class Keyboard {
         when: true,
       });
 
-      local.layers = [...(local.layers ?? []), ...(config.layers ?? [])];
+      local.layers = [...new Set([...(local.layers ?? []), ...(config.layers ?? [])])];
 
       if (local.signal?.aborted) return;
 
