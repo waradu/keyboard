@@ -262,7 +262,7 @@ The structure is:
 
 Special keys:
 
-- `$any`: match any key
+- `$any`: match any key and ignores modifiers
 - `$num`: match any number key and expose it as `context.template`
 
 Platform prefixes:

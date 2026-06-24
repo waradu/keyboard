@@ -50,9 +50,13 @@ export function useKeyboardInspector(): {
     allHandlers.value = handlers;
   });
 
-  onBeforeUnmount(() => {
-    unsubscribe?.();
-  });
+  const vm = getCurrentInstance();
+
+  if (vm) {
+    onBeforeUnmount(() => {
+      unsubscribe?.();
+    });
+  }
 
   return { handlers: allHandlers, unsubscribe };
 }

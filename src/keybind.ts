@@ -256,7 +256,7 @@ export class Keybind {
         alt: shape.modifiers?.alt ?? false,
         ctrl: Boolean(!ctrlCmd && shape.modifiers?.ctrl),
         ctrlCmd: ctrlCmd,
-        meta: Boolean(!ctrlCmd && shape.modifiers?.ctrl),
+        meta: Boolean(!ctrlCmd && shape.modifiers?.meta),
         shift: shape.modifiers?.shift ?? false,
       },
       platform: shape.platform,

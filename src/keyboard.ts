@@ -354,11 +354,13 @@ export class Keyboard {
         option.keys = [option.keys];
       }
 
-      let keys = option.keys.map((key) => Keybind.from(key)).filter((k) => !!k);
+      const keyArray = Array.isArray(option.keys) ? option.keys : [option.keys];
+
+      let keys = keyArray.map((key) => Keybind.from(key)).filter((k) => !!k);
 
       if (!keys.length) return;
 
-      const id = Math.random().toString(36).slice(2, 7);
+      const id = crypto.randomUUID();
 
       const off = () => {
         const index = this.handlers.findIndex((handler) => handler.id === id);
@@ -381,7 +383,7 @@ export class Keyboard {
 
       this.handlers.push(handler);
 
-      this.log(`added '${option.keys.join(", ")}' with id: '${id}'`);
+      this.log(`added '${keys.map((key) => key.toReadable().join(", "))}' with id: '${id}'`);
 
       return { id, off };
     });
