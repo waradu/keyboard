@@ -1,7 +1,6 @@
 import {
   ANYKEY,
   keys,
-  modifiers,
   platforms,
   SEPARATOR,
   type KeySequence,
@@ -38,12 +37,13 @@ export const anyKeyData: () => KeybindShape = () => ({
   modifiers: {
     alt: false,
     ctrl: false,
+    ctrlCmd: false,
     meta: false,
     shift: false,
   },
 });
 
-const MOD_ORDER: ModifierValue[] = ["meta", "ctrl", "alt", "shift"];
+const MOD_ORDER = ["meta", "ctrl", "ctrl-cmd", "alt", "shift"] as const;
 
 export type ModifierMap = Partial<Record<ModifierValue, boolean>>;
 
@@ -73,8 +73,8 @@ export const parseKeyString = (sequence: KeyString): KeybindShape | undefined =>
   const validKeyValues = new Set(Object.values(keys));
   if (!validKeyValues.has(key)) return;
 
-  const modSet = new Set(Object.values(modifiers));
-  const modifiersOnly = parts as ModifierValue[];
+  const modSet = new Set(MOD_ORDER);
+  const modifiersOnly = parts as Array<(typeof MOD_ORDER)[number]>;
 
   let lastIndex = -1;
   for (const mod of modifiersOnly) {
@@ -83,15 +83,20 @@ export const parseKeyString = (sequence: KeyString): KeybindShape | undefined =>
     if (idx === -1 || idx <= lastIndex) return;
     lastIndex = idx;
   }
+  if (modifiersOnly.includes("ctrl-cmd")) {
+    if (modifiersOnly.includes("meta") || modifiersOnly.includes("ctrl")) return;
+  }
 
   const modifierMap: Record<ModifierValue, boolean> = {
     alt: false,
     ctrl: false,
+    ctrlCmd: false,
     meta: false,
     shift: false,
   };
   for (const mod of modifiersOnly) {
-    modifierMap[mod] = true;
+    if (mod === "ctrl-cmd") modifierMap.ctrlCmd = true;
+    else modifierMap[mod] = true;
   }
 
   return {
@@ -108,6 +113,7 @@ export const parseCreateKeybindShape = (shape: CreateKeybindShape): KeybindShape
       shift: shape.modifiers?.shift ?? false,
       alt: shape.modifiers?.alt ?? false,
       ctrl: shape.modifiers?.ctrl ?? false,
+      ctrlCmd: shape.modifiers?.ctrlCmd ?? false,
       meta: shape.modifiers?.meta ?? false,
     },
     key: shape.key,

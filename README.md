@@ -220,7 +220,7 @@ unsubscribe();
 ```ts
 const stop = keyboard.record((sequence) => {
   console.log(sequence);
-  // { key: "k", modifiers: { meta: true, ctrl: false, alt: false, shift: true } }
+  // { key: "k", modifiers: { meta: true, ctrl: false, ctrlCmd: false, alt: false, shift: true } }
 });
 
 stop();
@@ -232,10 +232,10 @@ stop();
 import { parseKeyString } from "@waradu/keyboard";
 
 parseKeyString("meta+shift+k");
-// { key: "k", modifiers: { meta: true, ctrl: false, alt: false, shift: true } }
+// { key: "k", modifiers: { meta: true, ctrl: false, ctrlCmd: false, alt: false, shift: true } }
 
 parseKeyString("macos:meta+k");
-// { platform: "macos", key: "k", modifiers: { meta: true, ctrl: false, alt: false, shift: false } }
+// { platform: "macos", key: "k", modifiers: { meta: true, ctrl: false, ctrlCmd: false, alt: false, shift: false } }
 
 parseKeyString("unknown+k");
 // undefined
@@ -248,7 +248,7 @@ Key strings describe the key and modifiers that must be active for a handler to 
 The structure is:
 
 ```txt
-(platform:)?(meta+)?(ctrl+)?(alt+)?(shift+)?key
+(platform:)?(meta+)?(ctrl+)?(ctrl-cmd+)?(alt+)?(shift+)?key
 ```
 
 Special keys:
@@ -265,11 +265,17 @@ Platform prefixes:
 - `no-win`
 - `no-linux`
 
-The modifier order is fixed: `meta`, `ctrl`, `alt`, `shift`, then the key.
+The modifier order is fixed: `meta`, `ctrl`, `ctrl-cmd`, `alt`, `shift`, then the key.
+
+`ctrl-cmd` maps to Cmd (`meta`) on macOS and Ctrl (`ctrl`) on other platforms.
+It can be combined with `alt` and `shift`, but not with `meta` or `ctrl`.
+In `KeybindShape` / `CreateKeybindShape` objects, the same modifier field is named `ctrlCmd`.
 
 Examples:
 
 - `"ctrl+x"`: valid
+- `"ctrl-cmd+k"`: valid
+- `"ctrl-cmd+shift+k"`: valid
 - `"meta+ctrl+alt+shift+arrow-up"`: valid
 - `"c"`: valid
 - `"macos:x"`: valid
@@ -278,6 +284,7 @@ Examples:
 - `""`: invalid
 - `"shift+alt+y"`: invalid, because `shift` comes after `alt`
 - `"meta+ctrl"`: invalid, because the key is missing
+- `"meta+ctrl-cmd+k"`: invalid, because `ctrl-cmd` cannot be mixed with `meta` or `ctrl`
 - `"lunix:x"`: invalid platform
 - `"xy"`: invalid, because only one key can be used
 
@@ -417,13 +424,19 @@ Directives are Nuxt-only. Pass the handler to `v-keybind` and use the directive 
 Use directive modifiers for keyboard modifiers, `prevent`, and `once`:
 
 ```html
-<input type="text" v-keybind.ctrl.shift.once.prevent:enter="onEnter" />
+<input type="text" v-keybind:enter.ctrl.shift.once.prevent="onEnter" />
+```
+
+Use `ctrl-cmd` as a directive modifier for the cross-platform Cmd/Ctrl key:
+
+```html
+<input type="text" v-keybind:k.ctrl-cmd="openCommandPalette" />
 ```
 
 The directive arg is the key. For platform-aware or multi-key bindings, use `useKeybind`.
 
 ```html
-<input type="text" v-keybind.meta:k="openCommandPalette" />
+<input type="text" v-keybind:k.meta="openCommandPalette" />
 ```
 
 The directive automatically limits the handler to that focused element.
@@ -559,12 +572,14 @@ Platform-aware undo and redo:
 ```ts
 keyboard.bind([
   {
-    keys: ["no-macos:ctrl+z", "macos:meta+z"],
+    // With ctr-cmd
+    keys: "ctrl-cmd+z",
     run() {
       console.log("undo");
     },
   },
   {
+    // Manually
     keys: ["no-macos:ctrl+shift+z", "macos:meta+shift+z"],
     run() {
       console.log("redo");

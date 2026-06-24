@@ -5,7 +5,7 @@ import { useKeybind } from "./composables";
 
 const KEY = Symbol("keybind");
 
-type KeybindDirectiveModifier = "alt" | "ctrl" | "meta" | "once" | "prevent" | "shift";
+type KeybindDirectiveModifier = "alt" | "ctrl" | "meta" | "ctrl-cmd" | "once" | "prevent" | "shift";
 
 type KeybindElement = HTMLElement & {
   [KEY]?: () => void;
@@ -31,6 +31,7 @@ function register(
       modifiers: {
         alt: modifiers.alt,
         ctrl: modifiers.ctrl,
+        ctrlCmd: modifiers["ctrl-cmd"],
         meta: modifiers.meta,
         shift: modifiers.shift,
       },

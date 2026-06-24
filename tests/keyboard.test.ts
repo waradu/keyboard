@@ -270,6 +270,36 @@ test("keyboard handler can handle complex keybinds", () => {
   keyboard.destroy();
 });
 
+test("keyboard handler maps ctrl-cmd to meta on macos and ctrl elsewhere", () => {
+  const { keyboard: macosKeyboard, spy: macosSpy } = prepare("macos");
+
+  macosKeyboard.bind({
+    keys: ["ctrl-cmd+k"],
+    run: macosSpy,
+  });
+
+  press("Meta", { metaKey: true });
+  press("k", { metaKey: true });
+
+  expect(macosSpy).toHaveBeenCalledTimes(1);
+
+  macosKeyboard.destroy();
+
+  const { keyboard: windowsKeyboard, spy: windowsSpy } = prepare("windows");
+
+  windowsKeyboard.bind({
+    keys: ["ctrl-cmd+k"],
+    run: windowsSpy,
+  });
+
+  press("Control", { ctrlKey: true });
+  press("k", { ctrlKey: true });
+
+  expect(windowsSpy).toHaveBeenCalledTimes(1);
+
+  windowsKeyboard.destroy();
+});
+
 test("keyboard handler only fires on macos", () => {
   const { keyboard, spy } = prepare("macos");
 
@@ -341,6 +371,18 @@ test("parse key string into key data", () => {
     modifiers: {
       alt: false,
       ctrl: false,
+      ctrlCmd: false,
+      meta: false,
+      shift: false,
+    },
+  });
+
+  expect(parseKeyString("ctrl-cmd+k")).toEqual({
+    key: "k",
+    modifiers: {
+      alt: false,
+      ctrl: false,
+      ctrlCmd: true,
       meta: false,
       shift: false,
     },
@@ -351,6 +393,7 @@ test("parse key string into key data", () => {
     modifiers: {
       alt: true,
       ctrl: true,
+      ctrlCmd: false,
       meta: true,
       shift: true,
     },
@@ -362,6 +405,7 @@ test("parse key string into key data", () => {
     modifiers: {
       alt: false,
       ctrl: false,
+      ctrlCmd: false,
       meta: false,
       shift: false,
     },
@@ -372,6 +416,7 @@ test("parse key string into key data", () => {
     modifiers: {
       alt: true,
       ctrl: false,
+      ctrlCmd: false,
       meta: false,
       shift: false,
     },
@@ -382,6 +427,7 @@ test("parse key string into key data", () => {
     modifiers: {
       alt: false,
       ctrl: false,
+      ctrlCmd: false,
       meta: false,
       shift: false,
     },
@@ -389,6 +435,10 @@ test("parse key string into key data", () => {
 
   //@ts-expect-error out of order
   expect(parseKeyString("meta+alt+ctrl+k")).toBeUndefined();
+  //@ts-expect-error ctrl-cmd can not be mixed with meta
+  expect(parseKeyString("meta+ctrl-cmd+k")).toBeUndefined();
+  //@ts-expect-error ctrl-cmd can not be mixed with ctrl
+  expect(parseKeyString("ctrl+ctrl-cmd+k")).toBeUndefined();
   //@ts-expect-error mac does not exist
   expect(parseKeyString("mac:k")).toBeUndefined();
   //@ts-expect-error notreal is not a real key (duh)

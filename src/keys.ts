@@ -137,6 +137,7 @@ export const keys = {
 export const modifiers = {
   meta: "meta",
   ctrl: "ctrl",
+  ctrlCmd: "ctrlCmd",
   alt: "alt",
   shift: "shift",
 } as const;
@@ -165,7 +166,9 @@ type FixedCombinations<T extends readonly string[], Acc extends string[] = []> =
   ? FixedCombinations<R, Acc> | FixedCombinations<R, [...Acc, F]>
   : Acc;
 
-type PrefixTuples = Exclude<FixedCombinations<["meta", "ctrl", "alt", "shift"]>, []>;
+type PhysicalPrefixTuples = Exclude<FixedCombinations<["meta", "ctrl", "alt", "shift"]>, []>;
+type CtrlCmdPrefixTuples = Exclude<FixedCombinations<["ctrl-cmd", "alt", "shift"]>, []>;
+type PrefixTuples = PhysicalPrefixTuples | CtrlCmdPrefixTuples;
 
 type Join<T extends readonly string[]> = T extends []
   ? ""

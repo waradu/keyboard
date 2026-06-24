@@ -59,9 +59,9 @@ export class Keyboard {
       for (const key of handler.keys) {
         if (key.key === ANYKEY) return true;
 
-        if (key.platform) {
-          const browserPlatform = this.config.platform ?? detectOsInBrowser();
+        const browserPlatform = this.config.platform ?? detectOsInBrowser();
 
+        if (key.platform) {
           if (key.platform === "linux" && browserPlatform !== "linux") continue;
           if (key.platform === "win" && browserPlatform !== "windows") continue;
           if (key.platform === "macos" && browserPlatform !== "macos") continue;
@@ -81,8 +81,11 @@ export class Keyboard {
 
         if (key.modifiers.shift !== event.shiftKey) continue;
         if (key.modifiers.alt !== event.altKey) continue;
-        if (key.modifiers.ctrl !== event.ctrlKey) continue;
-        if (key.modifiers.meta !== event.metaKey) continue;
+        const ctrlCmd = key.modifiers.ctrlCmd;
+        const expectsCtrl = key.modifiers.ctrl || (ctrlCmd && browserPlatform !== "macos");
+        const expectsMeta = key.modifiers.meta || (ctrlCmd && browserPlatform === "macos");
+        if (expectsCtrl !== event.ctrlKey) continue;
+        if (expectsMeta !== event.metaKey) continue;
 
         if (!handler.config.layers || handler.config.layers.length === 0) return true;
 
@@ -417,6 +420,7 @@ export class Keyboard {
         if (key.modifiers.shift !== shape.modifiers.shift) continue;
         if (key.modifiers.alt !== shape.modifiers.alt) continue;
         if (key.modifiers.ctrl !== shape.modifiers.ctrl) continue;
+        if (key.modifiers.ctrlCmd !== shape.modifiers.ctrlCmd) continue;
         if (key.modifiers.meta !== shape.modifiers.meta) continue;
 
         return true;
@@ -447,6 +451,7 @@ export class Keyboard {
           shift: event.shiftKey,
           alt: event.altKey,
           ctrl: event.ctrlKey,
+          ctrlCmd: false,
           meta: event.metaKey,
         },
       });

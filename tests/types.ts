@@ -9,6 +9,9 @@ import type { KeyString } from "../src/keys";
   // Complex KeyString
   "meta+ctrl+alt+shift+arrow-up",
 
+  // Platform primary modifier
+  "ctrl-cmd+shift+k",
+
   // Single Key
   "c",
 
@@ -29,6 +32,12 @@ import type { KeyString } from "../src/keys";
 
   // @ts-expect-error `key` is required
   "meta+ctrl",
+
+  // @ts-expect-error `ctrl-cmd` can not be mixed with `meta`
+  "meta+ctrl-cmd+k",
+
+  // @ts-expect-error `ctrl-cmd` can not be mixed with `ctrl`
+  "ctrl+ctrl-cmd+k",
 
   // @ts-expect-error `lunix` is not a valid platform
   "lunix:x",
