@@ -32,6 +32,7 @@ export class Keyboard {
   private disabledLayers = new Set<string>();
   private subscribers: SubscribeCallback[] = [];
   private pressed = new Set<KeyValue>();
+  private abortSignalListeners?: AbortController;
   ready: boolean = false;
   paused: boolean = false;
 
@@ -197,6 +198,9 @@ export class Keyboard {
    * To re-enable listening after calling this, call `init()` again.
    */
   stop() {
+    this.abortSignalListeners?.abort();
+    this.abortSignalListeners = undefined;
+
     if (typeof window !== "undefined") {
       window.removeEventListener("keydown", this.onKeydown);
       window.removeEventListener("keyup", this.onKeyup);
@@ -253,10 +257,30 @@ export class Keyboard {
 
       this.ready = true;
 
-      const abortSignal = opts?.signal ?? this.config.signal;
-      if (abortSignal) {
-        if (abortSignal.aborted) this.destroy();
-        else abortSignal.addEventListener("abort", () => this.destroy(), { once: true });
+      const configSignal = this.config.signal;
+      const initSignal = opts?.signal;
+
+      if (configSignal?.aborted || initSignal?.aborted) {
+        this.destroy();
+        return;
+      }
+
+      if (configSignal || initSignal) {
+        this.abortSignalListeners = new AbortController();
+
+        if (configSignal) {
+          configSignal.addEventListener("abort", () => this.destroy(), {
+            once: true,
+            signal: this.abortSignalListeners.signal,
+          });
+        }
+
+        if (initSignal && initSignal !== configSignal) {
+          initSignal.addEventListener("abort", () => this.destroy(), {
+            once: true,
+            signal: this.abortSignalListeners.signal,
+          });
+        }
       }
 
       this.log("initialized");
