@@ -1,7 +1,7 @@
 import { test, expect, mock, type Mock } from "bun:test";
 
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
-import { parseKeyString, Keyboard } from "@waradu/keyboard";
+import { Keybind, Keyboard } from "@waradu/keyboard";
 
 import type { HandlerContext, Os } from "../src/types";
 
@@ -388,7 +388,7 @@ test("keyboard handler returns dynamic number press", () => {
 });
 
 test("parse key string into key data", () => {
-  expect(parseKeyString("x")).toEqual({
+  expect(Keybind.fromString("x")?.toShape()).toEqual({
     key: "x",
     modifiers: {
       alt: false,
@@ -399,7 +399,7 @@ test("parse key string into key data", () => {
     },
   });
 
-  expect(parseKeyString("ctrl-cmd+k")).toEqual({
+  expect(Keybind.fromString("ctrl-cmd+k")?.toShape()).toEqual({
     key: "k",
     modifiers: {
       alt: false,
@@ -410,7 +410,7 @@ test("parse key string into key data", () => {
     },
   });
 
-  expect(parseKeyString("meta+ctrl+alt+shift+arrow-up")).toEqual({
+  expect(Keybind.fromString("meta+ctrl+alt+shift+arrow-up")?.toShape()).toEqual({
     key: "arrow-up",
     modifiers: {
       alt: true,
@@ -421,7 +421,7 @@ test("parse key string into key data", () => {
     },
   });
 
-  expect(parseKeyString("macos:x")).toEqual({
+  expect(Keybind.fromString("macos:x")?.toShape()).toEqual({
     platform: "macos",
     key: "x",
     modifiers: {
@@ -433,7 +433,7 @@ test("parse key string into key data", () => {
     },
   });
 
-  expect(parseKeyString("alt+$num")).toEqual({
+  expect(Keybind.fromString("alt+$num")?.toShape()).toEqual({
     key: "$num",
     modifiers: {
       alt: true,
@@ -444,7 +444,7 @@ test("parse key string into key data", () => {
     },
   });
 
-  expect(parseKeyString("$any")).toEqual({
+  expect(Keybind.fromString("$any")?.toShape()).toEqual({
     key: "$any",
     modifiers: {
       alt: false,
@@ -456,13 +456,13 @@ test("parse key string into key data", () => {
   });
 
   //@ts-expect-error out of order
-  expect(parseKeyString("meta+alt+ctrl+k")).toBeUndefined();
+  expect(Keybind.fromString("meta+alt+ctrl+k")).toBeUndefined();
   //@ts-expect-error ctrl-cmd can not be mixed with meta
-  expect(parseKeyString("meta+ctrl-cmd+k")).toBeUndefined();
+  expect(Keybind.fromString("meta+ctrl-cmd+k")).toBeUndefined();
   //@ts-expect-error ctrl-cmd can not be mixed with ctrl
-  expect(parseKeyString("ctrl+ctrl-cmd+k")).toBeUndefined();
+  expect(Keybind.fromString("ctrl+ctrl-cmd+k")).toBeUndefined();
   //@ts-expect-error mac does not exist
-  expect(parseKeyString("mac:k")).toBeUndefined();
+  expect(Keybind.fromString("mac:k")).toBeUndefined();
   //@ts-expect-error notreal is not a real key (duh)
-  expect(parseKeyString("meta+notreal")).toBeUndefined();
+  expect(Keybind.fromString("meta+notreal")).toBeUndefined();
 });
