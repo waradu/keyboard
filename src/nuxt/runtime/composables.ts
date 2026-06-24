@@ -2,7 +2,9 @@ import { useNuxtApp } from "nuxt/app";
 import { getCurrentInstance, onBeforeUnmount, ref } from "vue";
 import type { Ref } from "vue";
 
-import type { Handlers, Keybind, Keyboard } from "../../";
+import type { Keybind } from "../../keybind";
+import type { Keyboard } from "../../keyboard";
+import type { Handlers } from "../../types";
 
 export const useKeybind = ((...args: Parameters<Keyboard["bind"]>) => {
   const { $keyboard } = useNuxtApp();

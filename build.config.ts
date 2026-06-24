@@ -3,6 +3,11 @@ import { defineBuildConfig } from "unbuild";
 export default defineBuildConfig({
   entries: [
     "src/index",
+    "src/keyboard",
+    "src/keybind",
+    "src/helper",
+    "src/keys",
+    "src/types",
     "src/nuxt/module",
     {
       builder: "mkdist",

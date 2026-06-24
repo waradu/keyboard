@@ -18,5 +18,5 @@
   "[markdown]": {
     "editor.defaultFormatter": "oxc.oxc-vscode"
   },
-  "js/ts.preferences.autoImportSpecifierExcludeRegexes": ["/dist"]
+  "js/ts.preferences.autoImportSpecifierExcludeRegexes": ["/dist", "[./]$", "(?:^|/)index(?:\\.|$)"]
 }

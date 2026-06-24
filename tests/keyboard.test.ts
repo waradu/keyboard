@@ -2,7 +2,8 @@ import { test, expect, mock, type Mock } from "bun:test";
 
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
 
-import { Keybind, Keyboard } from "../src/";
+import { Keybind } from "../src/keybind";
+import { Keyboard } from "../src/keyboard";
 import type { HandlerContext, Os } from "../src/types";
 
 GlobalRegistrator.register();

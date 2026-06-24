@@ -1,6 +1,7 @@
 import type { Directive } from "vue";
 
-import type { Options, KeySequence } from "../../";
+import type { KeySequence } from "../../keys";
+import type { Options } from "../../types";
 import { useKeybind } from "./composables";
 
 const KEY = Symbol("keybind");
