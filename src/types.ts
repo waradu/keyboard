@@ -42,6 +42,8 @@ export interface HandlerContext {
   event: KeyboardEvent;
 }
 
+type When = boolean | null | undefined | void;
+
 export interface Config {
   /**
    * Prevent default.
@@ -94,7 +96,7 @@ export interface Config {
   /**
    * Boolish value or predicate function before each run whether the listener should run.
    */
-  when?: unknown | (() => unknown);
+  when?: When | (() => When);
 
   signal?: AbortSignal;
 }

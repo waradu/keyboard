@@ -142,11 +142,15 @@ export class Keyboard {
       const pressedKeysArray = Array.from(this.pressed);
       const pressedNumber = parseInt(pressedKeysArray[pressedKeysArray.length - 1]!);
 
-      handler.handler({
-        template: Number.isNaN(pressedNumber) ? undefined : pressedNumber,
-        handler,
-        event,
-      });
+      try {
+        handler.handler({
+          template: Number.isNaN(pressedNumber) ? undefined : pressedNumber,
+          handler,
+          event,
+        });
+      } catch (e) {
+        this.log(e);
+      }
 
       this.log(`handled '${handler.id}'`);
 
