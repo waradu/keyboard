@@ -361,6 +361,8 @@ export class Keyboard {
 
       let keys = option.keys.map((key) => Keybind.from(key)).filter((k) => !!k);
 
+      if (!keys.length) return;
+
       const id = Math.random().toString(36).slice(2, 7);
 
       const off = () => {
