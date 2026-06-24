@@ -121,17 +121,6 @@ export class Keyboard {
         }
       }
 
-      if (handler.config?.prevent) event.preventDefault();
-      if (handler.config?.stop === true) event.stopPropagation();
-      if (handler.config?.stop === "immediate") event.stopImmediatePropagation();
-      if (handler.config?.stop === "both") {
-        event.stopPropagation();
-        event.stopImmediatePropagation();
-      }
-
-      const pressedKeysArray = Array.from(this.pressed);
-      const pressedNumber = parseInt(pressedKeysArray[pressedKeysArray.length - 1]!);
-
       if (!handler.config.when) {
         return;
       } else if (typeof handler.config.when === "function") {
@@ -143,6 +132,17 @@ export class Keyboard {
           return;
         }
       }
+
+      if (handler.config?.prevent) event.preventDefault();
+      if (handler.config?.stop === true) event.stopPropagation();
+      if (handler.config?.stop === "immediate") event.stopImmediatePropagation();
+      if (handler.config?.stop === "both") {
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+      }
+
+      const pressedKeysArray = Array.from(this.pressed);
+      const pressedNumber = parseInt(pressedKeysArray[pressedKeysArray.length - 1]!);
 
       handler.handler({
         template: Number.isNaN(pressedNumber) ? undefined : pressedNumber,
