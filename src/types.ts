@@ -1,3 +1,4 @@
+import type { Keybind } from "./keybind";
 import type { AnyKey, KeyString, KeyValue, ModifierValue, PlatformValue } from "./keys";
 
 export type Os = "macos" | "linux" | "windows" | "unknown";
@@ -23,8 +24,6 @@ export interface KeyboardConfig {
   signal?: AbortSignal;
 }
 
-export type ModifierMap = Partial<Record<ModifierValue, boolean>>;
-
 export interface KeybindShape {
   platform?: PlatformValue;
   modifiers: Record<ModifierValue, boolean>;
@@ -33,7 +32,7 @@ export interface KeybindShape {
 
 export interface CreateKeybindShape {
   platform?: PlatformValue;
-  modifiers?: ModifierMap;
+  modifiers?: Partial<Record<ModifierValue, boolean>>;
   key: KeyValue | AnyKey;
 }
 
@@ -106,15 +105,17 @@ export interface Handler {
   id: string;
   off: () => unknown;
 
-  keys: KeybindShape[];
+  keys: Keybind[];
   handler: HandlerFunc;
   config: Config;
 }
 
 export type Handlers = Handler[];
 
+export type OptionsKeys = KeyString | CreateKeybindShape | Keybind;
+
 export interface Options {
-  keys: KeyString | CreateKeybindShape | (KeyString | CreateKeybindShape)[];
+  keys: OptionsKeys | OptionsKeys[];
   run: HandlerFunc;
   config?: Config;
 }

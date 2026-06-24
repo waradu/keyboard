@@ -106,11 +106,11 @@ console.log(handlers.value);
 unsubscribe();
 ```
 
-Record keybind shapes:
+Record keybinds:
 
 ```ts
-const stop = useKeybindRecorder((sequence) => {
-  console.log(sequence);
+const stop = useKeybindRecorder((keybind) => {
+  console.log(keybind.toString());
 });
 
 stop();
@@ -153,7 +153,7 @@ const off = keyboard.bind({
 off();
 ```
 
-`keys` can be a single key string, a keybind shape, or an array of both.
+`keys` can be a key string, a `Keybind`, a plain keybind shape, or an array of them.
 
 ```ts
 keyboard.bind({
@@ -218,27 +218,23 @@ unsubscribe();
 ### Record Keybinds
 
 ```ts
-const stop = keyboard.record((sequence) => {
-  console.log(sequence);
-  // { key: "k", modifiers: { meta: true, ctrl: false, ctrlCmd: false, alt: false, shift: true } }
+const stop = keyboard.record((keybind) => {
+  console.log(keybind.toString());
 });
 
 stop();
 ```
 
-### Parse Key Strings
+### Keybinds
 
 ```ts
-import { parseKeyString } from "@waradu/keyboard";
+import { Keybind } from "@waradu/keyboard";
 
-parseKeyString("meta+shift+k");
-// { key: "k", modifiers: { meta: true, ctrl: false, ctrlCmd: false, alt: false, shift: true } }
+const keybind = Keybind.fromString("meta+shift+k");
 
-parseKeyString("macos:meta+k");
-// { platform: "macos", key: "k", modifiers: { meta: true, ctrl: false, ctrlCmd: false, alt: false, shift: false } }
-
-parseKeyString("unknown+k");
-// undefined
+keybind?.toString(); // "meta+shift+k"
+keybind?.toShape(); // { key, modifiers, platform? }
+keybind?.equals("meta+shift+k"); // true
 ```
 
 ## Key Strings
@@ -448,8 +444,7 @@ Rewrite started in `552b0f14cd5e71ccdf08d1e74d42da58115f70b9`.
 - Renamed the `control` modifier to `ctrl`
 - Changed key-string separators from `_` to `+`
 - Changed catch-all key from `any` to `$any`
-- Changed keybind data to `KeybindShape` / `CreateKeybindShape`
-- Removed `parseKeyData`
+- Added the `Keybind` class for parsing, formatting, comparing, and converting keybinds
 - Added automatic initialization when `window` is available
 - Added `ctrl-cmd` as a cross-platform Cmd/Ctrl modifier
 - Added `pause()`, `resume()`, and `toggle()` for temporarily pausing the keyboard

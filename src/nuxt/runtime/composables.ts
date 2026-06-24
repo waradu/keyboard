@@ -1,4 +1,4 @@
-import type { Handlers, KeybindShape, Keyboard } from "@waradu/keyboard";
+import type { Handlers, Keybind, Keyboard } from "@waradu/keyboard";
 import { useNuxtApp } from "nuxt/app";
 import { getCurrentInstance, onBeforeUnmount, ref } from "vue";
 
@@ -52,7 +52,7 @@ export function useKeyboardInspector() {
   return { handlers: allHandlers, unsubscribe };
 }
 
-export function useKeybindRecorder(cb: (sequence: KeybindShape) => void) {
+export function useKeybindRecorder(cb: (keybind: Keybind) => void) {
   const { $keyboard } = useNuxtApp();
 
   const vm = getCurrentInstance();

@@ -29,7 +29,7 @@
         </template>
         <span>{{ handler.config.once ? "(once)" : "" }}</span>
         <span>{{
-          handler.config.layers ? `(layer: ${handler.config.layers.join(", ")})` : ""
+          handler.config.layers?.length ? `(layer: ${handler.config.layers.join(", ")})` : ""
         }}</span>
       </div>
     </ClientOnly>

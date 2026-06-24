@@ -1,11 +1,5 @@
-import {
-  merge,
-  parseKeyString,
-  parseCreateKeybindShape,
-  anyKeyData,
-  detectOsInBrowser,
-  isEditableElement,
-} from "./helper";
+import { merge, detectOsInBrowser, isEditableElement } from "./helper";
+import { Keybind } from "./keybind";
 import {
   ANYKEY,
   keys,
@@ -24,6 +18,7 @@ import type {
   Options,
   KeybindShape,
   HandlerContext,
+  OptionsKeys,
 } from "./types";
 
 export class Keyboard {
@@ -362,15 +357,7 @@ export class Keyboard {
         option.keys = [option.keys];
       }
 
-      let keys = option.keys
-        .map((key) =>
-          typeof key === "string" ? parseKeyString(key) : parseCreateKeybindShape(key),
-        )
-        .filter((k) => !!k);
-
-      if (keys.find((k) => k.key === ANYKEY)) {
-        keys = [anyKeyData()];
-      }
+      let keys = option.keys.map((key) => Keybind.from(key)).filter((k) => !!k);
 
       const id = Math.random().toString(36).slice(2, 7);
 
@@ -436,21 +423,13 @@ export class Keyboard {
   /**
    * Check if Key String listener already exists.
    */
-  exists(sequence: KeyString) {
-    const shape = parseKeyString(sequence);
+  exists(sequence: OptionsKeys) {
+    const shape = Keybind.from(sequence);
     if (!shape) return false;
 
     return this.handlers.some((handler) => {
       for (const key of handler.keys) {
-        if (key.key !== shape.key) continue;
-        if (key.platform !== shape.platform) continue;
-        if (key.modifiers.shift !== shape.modifiers.shift) continue;
-        if (key.modifiers.alt !== shape.modifiers.alt) continue;
-        if (key.modifiers.ctrl !== shape.modifiers.ctrl) continue;
-        if (key.modifiers.ctrlCmd !== shape.modifiers.ctrlCmd) continue;
-        if (key.modifiers.meta !== shape.modifiers.meta) continue;
-
-        return true;
+        if (key.equals(shape)) return true;
       }
 
       return false;
@@ -458,13 +437,13 @@ export class Keyboard {
   }
 
   /**
-   * Record pressed keys and emit them as a KeybindShape.
+   * Record pressed keys and emit them as a Keybind.
    *
-   * @param callback Receives each recorded keybind shape.
+   * @param callback Receives each recorded keybind.
    * @returns Function to stop recording.
    */
-  record(cb: (sequence: KeybindShape) => void) {
-    const handler = (event: KeyboardEvent): KeybindShape | undefined => {
+  record(cb: (keybind: Keybind) => void) {
+    const handler = (event: KeyboardEvent): Keybind | undefined => {
       if (event.isComposing) return;
 
       const eventKey = event.key.toLowerCase();
@@ -472,16 +451,18 @@ export class Keyboard {
 
       if (!key) return;
 
-      cb({
-        key,
-        modifiers: {
-          shift: event.shiftKey,
-          alt: event.altKey,
-          ctrl: event.ctrlKey,
-          ctrlCmd: false,
-          meta: event.metaKey,
-        },
-      });
+      cb(
+        Keybind.fromShape({
+          key,
+          modifiers: {
+            shift: event.shiftKey,
+            alt: event.altKey,
+            ctrl: event.ctrlKey,
+            ctrlCmd: false,
+            meta: event.metaKey,
+          },
+        }),
+      );
     };
 
     if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
@@ -612,5 +593,6 @@ export type {
   KeybindShape,
   KeyValue,
   ModifierValue,
+  OptionsKeys,
 };
-export { parseKeyString };
+export { Keybind };
