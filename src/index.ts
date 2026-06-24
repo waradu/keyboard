@@ -184,6 +184,8 @@ export class Keyboard {
       handler.off();
     }
     this.handlers.length = 0;
+    this.allLayers.clear();
+    this.disabledLayers.clear();
     this.pressed.clear();
     this.log(`cleared`);
 
