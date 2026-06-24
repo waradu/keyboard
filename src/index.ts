@@ -57,8 +57,6 @@ export class Keyboard {
 
     const candidates = this.handlers.filter((handler) => {
       for (const key of handler.keys) {
-        if (key.key === ANYKEY) return true;
-
         const browserPlatform = this.config.platform ?? detectOsInBrowser();
 
         if (key.platform) {
@@ -70,22 +68,24 @@ export class Keyboard {
           if (key.platform === "no-macos" && browserPlatform === "macos") continue;
         }
 
-        const pressedArray = Array.from(this.pressed);
-        const firstKey = pressedArray[pressedArray.length - 1];
+        if (key.key !== ANYKEY) {
+          const pressedArray = Array.from(this.pressed);
+          const firstKey = pressedArray[pressedArray.length - 1];
 
-        if (key.key === "$num" && Number.isNaN(parseInt(firstKey!))) {
-          continue;
-        } else if (key.key !== "$num" && !Array.from(this.pressed).includes(key.key)) {
-          continue;
+          if (key.key === "$num" && Number.isNaN(parseInt(firstKey!))) {
+            continue;
+          } else if (key.key !== "$num" && !Array.from(this.pressed).includes(key.key)) {
+            continue;
+          }
+
+          if (key.modifiers.shift !== event.shiftKey) continue;
+          if (key.modifiers.alt !== event.altKey) continue;
+          const ctrlCmd = key.modifiers.ctrlCmd;
+          const expectsCtrl = key.modifiers.ctrl || (ctrlCmd && browserPlatform !== "macos");
+          const expectsMeta = key.modifiers.meta || (ctrlCmd && browserPlatform === "macos");
+          if (expectsCtrl !== event.ctrlKey) continue;
+          if (expectsMeta !== event.metaKey) continue;
         }
-
-        if (key.modifiers.shift !== event.shiftKey) continue;
-        if (key.modifiers.alt !== event.altKey) continue;
-        const ctrlCmd = key.modifiers.ctrlCmd;
-        const expectsCtrl = key.modifiers.ctrl || (ctrlCmd && browserPlatform !== "macos");
-        const expectsMeta = key.modifiers.meta || (ctrlCmd && browserPlatform === "macos");
-        if (expectsCtrl !== event.ctrlKey) continue;
-        if (expectsMeta !== event.metaKey) continue;
 
         if (!handler.config.layers || handler.config.layers.length === 0) return true;
 
