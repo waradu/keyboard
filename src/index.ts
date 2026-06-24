@@ -68,9 +68,11 @@ export class Keyboard {
           const pressedArray = Array.from(this.pressed);
           const firstKey = pressedArray[pressedArray.length - 1];
 
+          if (!firstKey) continue;
+
           if (key.key === "$num" && Number.isNaN(parseInt(firstKey!))) {
             continue;
-          } else if (key.key !== "$num" && !Array.from(this.pressed).includes(key.key)) {
+          } else if (key.key !== "$num" && firstKey !== key.key) {
             continue;
           }
 
