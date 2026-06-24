@@ -10,7 +10,7 @@ export default defineBuildConfig({
       outDir: "dist/nuxt/runtime",
     },
   ],
-  declaration: true,
+  declaration: "node16",
   clean: true,
   externals: ["@nuxt/kit", "@nuxt/schema", "nuxt/app", "vue"],
 });

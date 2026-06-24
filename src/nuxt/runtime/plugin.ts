@@ -1,6 +1,6 @@
-import { Keyboard } from "@waradu/keyboard";
 import { defineNuxtPlugin, useRuntimeConfig } from "nuxt/app";
 
+import { Keyboard } from "../../";
 import { vKeybind } from "./directives";
 
 export default defineNuxtPlugin((nuxtApp) => {

@@ -16,10 +16,7 @@
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "noPropertyAccessFromIndexSignature": false,
-    "paths": {
-      "@waradu/keyboard": ["./src/index.ts"]
-    }
+    "noPropertyAccessFromIndexSignature": false
   },
-  "exclude": ["playground"]
+  "exclude": ["playground", "dist"]
 }
