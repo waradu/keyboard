@@ -2,12 +2,8 @@ import type { Handlers, Keybind, Keyboard } from "@waradu/keyboard";
 import { useNuxtApp } from "nuxt/app";
 import { getCurrentInstance, onBeforeUnmount, ref } from "vue";
 
-interface KeyboardNuxtApp {
-  $keyboard: Keyboard;
-}
-
 export const useKeybind = ((...args: Parameters<Keyboard["bind"]>) => {
-  const { $keyboard } = useNuxtApp() as unknown as KeyboardNuxtApp;
+  const { $keyboard } = useNuxtApp();
 
   const vm = getCurrentInstance();
   const off = $keyboard.bind(...args);
@@ -22,7 +18,7 @@ export const useKeybind = ((...args: Parameters<Keyboard["bind"]>) => {
 }) as Keyboard["bind"];
 
 export function useKeybindLayer(...args: Parameters<Keyboard["layers"]["create"]>) {
-  const { $keyboard } = useNuxtApp() as unknown as KeyboardNuxtApp;
+  const { $keyboard } = useNuxtApp();
 
   const vm = getCurrentInstance();
   const layer = $keyboard.layers.create(...args);
@@ -37,7 +33,7 @@ export function useKeybindLayer(...args: Parameters<Keyboard["layers"]["create"]
 }
 
 export function useKeyboardInspector() {
-  const { $keyboard } = useNuxtApp() as unknown as KeyboardNuxtApp;
+  const { $keyboard } = useNuxtApp();
 
   const allHandlers = ref<Handlers>([]);
 

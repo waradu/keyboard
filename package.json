@@ -1,7 +1,7 @@
 {
   "name": "@waradu/keyboard",
   "version": "9.0.0",
-  "description": "A keyboard manager compatible with TypeScript and Nuxt",
+  "description": "A keyboard manager compatible with JavaScript, TypeScript and Nuxt",
   "keywords": [
     "events",
     "hotkeys",
@@ -16,15 +16,28 @@
     "type": "git",
     "url": "git+https://github.com/waradu/keyboard.git"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "type": "module",
-  "main": "./src/index.ts",
-  "module": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts",
-    "./nuxt": "./src/nuxt/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs"
+    },
+    "./nuxt": {
+      "types": "./dist/nuxt/index.d.ts",
+      "import": "./dist/nuxt/index.mjs"
+    }
   },
   "scripts": {
+    "build": "unbuild",
+    "prepack": "bun run build",
     "playground": "cd playground && bun dev",
     "playground:prepare": "cd playground && bun i",
     "setup": "lefthook install",
@@ -33,9 +46,11 @@
     "format": "oxfmt",
     "format:check": "oxfmt --check"
   },
+  "dependencies": {
+    "@nuxt/kit": "4.4.8"
+  },
   "devDependencies": {
     "@happy-dom/global-registrator": "^20.10.3",
-    "@nuxt/kit": "4.4.8",
     "@nuxt/schema": "4.4.8",
     "@types/bun": "1.3.14",
     "@types/node": "^26.0.0",
@@ -43,9 +58,7 @@
     "nuxt": "4.4.8",
     "oxfmt": "^0.54.0",
     "oxlint": "^1.69.0",
-    "typescript": "6.0.3"
-  },
-  "peerDependencies": {
-    "typescript": "6"
+    "typescript": "6.0.3",
+    "unbuild": "^3.0.0"
   }
 }

@@ -1,6 +1,6 @@
 # Keyboard Manager
 
-A keyboard manager compatible with TypeScript and Nuxt.
+A keyboard manager compatible with JavaScript, TypeScript and Nuxt.
 
 [![validate](https://github.com/Waradu/keyboard/actions/workflows/validate.yml/badge.svg)](https://github.com/Waradu/keyboard/actions/workflows/validate.yml)
 

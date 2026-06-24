@@ -1,8 +1,8 @@
-// oxlint-disable-next-line typescript/triple-slash-reference
-/// <reference path="./index.d.ts" />
-
 import { defineNuxtModule, addPlugin, createResolver, addImports } from "@nuxt/kit";
 import type { Nuxt } from "@nuxt/schema";
+import type { Keyboard } from "@waradu/keyboard";
+
+import type { vKeybind } from "./runtime/directives";
 
 export interface ModuleOptions {
   debug?: boolean | undefined;
@@ -49,3 +49,21 @@ export default defineNuxtModule<ModuleOptions>({
     });
   },
 });
+
+declare module "nuxt/app" {
+  interface NuxtApp {
+    $keyboard: Keyboard;
+  }
+}
+
+declare module "vue" {
+  interface GlobalDirectives {
+    vKeybind: typeof vKeybind;
+  }
+}
+
+declare module "nuxt/schema" {
+  interface PublicRuntimeConfig {
+    keyboard: Partial<ModuleOptions>;
+  }
+}
